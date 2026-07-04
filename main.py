@@ -1,12 +1,10 @@
 import os
 import argparse
 import random
-import numpy as np
-import torch
-from datetime import datetime
-import torch.optim as optim
+import torch # type: ignore
+import torch.optim as optim # type: ignore
 
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader # type: ignore
 from src.dataloader.dataset import MedicalDataSets
 from albumentations.augmentations import transforms # type: ignore
 from albumentations.core.composition import Compose # type: ignore
@@ -14,24 +12,9 @@ from albumentations import RandomRotate90, Resize # type: ignore
 import src.utils.losses as losses
 from src.utils.util import AverageMeter
 from src.utils.metrics import iou_score
-
-def get_time_format():
-    """
-    获取当前时间的自定义格式字符串。
-    格式形如: 2026-01-01_01_02_03
-    """
-    return datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
-
-def seed_torch(seed):
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    torch.backends.cudnn.benchmark = False
-    torch.backends.cudnn.deterministic = True
-    random.seed(seed)
-    np.random.seed(seed)
-    os.environ['PYTHONHASHSEED'] = str(seed)
+from src.utils.seeds import seed_torch
+from src.utils.timing import get_time_format
+from src.utils.modelloader import build_model
 
 
 parser = argparse.ArgumentParser()
@@ -52,52 +35,6 @@ seed_torch(args.seed)
 
 model_name_hash = get_time_format() + "_" + str(random.randint(1, 1000))
 tmp_file_path = 'checkpoint/{}_model_{}_training.pth'.format(args.model, model_name_hash)
-
-# 有一定改动，不是原作者的写法
-def get_model(args, parser=None):
-    
-    if args.model == "CMUNet":
-        from src.network.conv_based.CMUNet import CMUNet
-        model = CMUNet(output_ch=args.num_classes).cuda()
-        
-    elif args.model == "CMUNeXt":
-        from src.network.conv_based.CMUNeXt import cmunext
-        model = cmunext(num_classes=args.num_classes).cuda()
-        
-    elif args.model == "U_Net":
-        from src.network.conv_based.U_Net import U_Net
-        model = U_Net(output_ch=args.num_classes).cuda()
-        
-    elif args.model == "AttU_Net":
-        from src.network.conv_based.AttU_Net import AttU_Net
-        model = AttU_Net(output_ch=args.num_classes).cuda()
-        
-    elif args.model == "UNext":
-        from src.network.conv_based.UNeXt import UNext
-        model = UNext(output_ch=args.num_classes).cuda()
-        
-    elif args.model == "UNetplus":
-        from src.network.conv_based.UNetplus import ResNet34UnetPlus
-        model = ResNet34UnetPlus(num_class=args.num_classes).cuda()
-        
-    elif args.model == "UNet3plus":
-        from src.network.conv_based.UNet3plus import UNet3plus
-        model = UNet3plus(n_classes=args.num_classes).cuda()
-    
-    elif args.model == "U_Net_re":
-        from src.network.conv_based.U_Net_re import U_Net
-        model = U_Net(ch_out=args.num_classes).cuda()
-
-    elif args.model == "Mobile_U_ViT":
-        from src.network.hybrid_based.Mobile_U_ViT import mobileuvit
-        model = mobileuvit(out_channel=args.num_classes).cuda()
-        
-    else:
-        # 只有在运行 Transformer 系列模型（如 TransUnet, SwinUnet, MedT）时，才会导入这个包
-        from src.network.transfomer_based.transformer_based_network import get_transformer_based_model
-        model = get_transformer_based_model(parser=parser, model_name=args.model, img_size=args.img_size,
-                                            num_classes=args.num_classes, in_ch=3).cuda()
-    return model
 
 
 def getDataloader(args):
@@ -131,7 +68,7 @@ def main(args):
 
     trainloader, valloader = getDataloader(args=args)
 
-    model = get_model(args)
+    model = build_model(args)
 
     print("train file dir:{} val file dir:{}".format(args.train_file_dir, args.val_file_dir))
 

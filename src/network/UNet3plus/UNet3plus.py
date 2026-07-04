@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import torch
 import torch.nn as nn
-from .other.layers import unetConv2
+from layers import unetConv2
 
 
 class UNet3plus(nn.Module):

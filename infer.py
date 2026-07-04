@@ -14,44 +14,44 @@ from torchvision.utils import save_image
 def load_model(args, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
     
     if "CMUNet" in args.model:
-        from src.network.conv_based.CMUNet import CMUNet
+        from src.network.CMUNet import CMUNet
         model = CMUNet(output_ch=args.num_classes).cuda()
         
     elif "CMUNeXt" in args.model:
-        from src.network.conv_based.CMUNeXt import cmunext
+        from src.network.CMUNeXt import cmunext
         model = cmunext(num_classes=args.num_classes).cuda()
     
     elif "U_Net_re" in args.model: # 小心前后缀影响
-        from src.network.conv_based.U_Net_re import U_Net
+        from src.network.U_Net_re import U_Net
         model = U_Net(ch_out=args.num_classes).cuda()
 
     elif "U_Net" in args.model:
-        from src.network.conv_based.U_Net import U_Net
+        from src.network.U_Net import U_Net
         model = U_Net(output_ch=args.num_classes).cuda()
         
     elif "AttU_Net" in args.model:
-        from src.network.conv_based.AttU_Net import AttU_Net
+        from src.network.AttU_Net import AttU_Net
         model = AttU_Net(output_ch=args.num_classes).cuda()
         
     elif "UNext" in args.model:
-        from src.network.conv_based.UNeXt import UNext
+        from src.network.UNeXt import UNext
         model = UNext(output_ch=args.num_classes).cuda()
         
     elif "UNetplus" in args.model:
-        from src.network.conv_based.UNetplus import ResNet34UnetPlus
+        from src.network.UNetplus import ResNet34UnetPlus
         model = ResNet34UnetPlus(num_class=args.num_classes).cuda()
         
     elif "UNet3plus" in args.model:
-        from src.network.conv_based.UNet3plus import UNet3plus
+        from src.network.other.UNet3plus import UNet3plus
         model = UNet3plus(n_classes=args.num_classes).cuda()
 
     elif "Mobile_U_ViT" in args.model:
-        from src.network.hybrid_based.Mobile_U_ViT import mobileuvit
+        from src.network.Mobile_U_ViT import mobileuvit
         model = mobileuvit(out_channel=args.num_classes).cuda()
         
     else:
         # 只有在运行 Transformer 系列模型（如 TransUnet, SwinUnet, MedT）时，才会导入这个包
-        from src.network.transfomer_based.transformer_based_network import get_transformer_based_model
+        from src.network.transformer_based_network import get_transformer_based_model
         model = get_transformer_based_model(parser=parser, model_name=args.model, img_size=args.img_size,
                                             num_classes=args.num_classes, in_ch=3).cuda()
 
