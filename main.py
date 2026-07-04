@@ -15,32 +15,36 @@ from src.utils.metrics import iou_score
 from src.utils.seeds import seed_torch
 from src.utils.timing import get_time_format
 from src.utils.modelloader import build_model
+from src.utils.get_yaml_config import yaml_config
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--model', type=str, default="Mobile_U_ViT",
-                    choices=["Mobile_U_ViT", "CMUNeXt", "CMUNet", "AttU_Net", "TransUnet", "R2U_Net", "U_Net",
-                             "UNext", "UNetplus", "UNet3plus", "SwinUnet", "MedT", "TransUnet", "U_Net_re"], help='model')
-parser.add_argument('--base_dir', type=str, default="./data/busi", help='dir')
-parser.add_argument('--train_file_dir', type=str, default="busi_train.txt", help='dir')
-parser.add_argument('--val_file_dir', type=str, default="busi_val.txt", help='dir')
-parser.add_argument('--base_lr', type=float, default=0.01, help='segmentation network learning rate')
-parser.add_argument('--batch_size', type=int, default=4, help='batch_size per gpu')
-parser.add_argument('--epoch', type=int, default=300, help='train epoch')
-parser.add_argument('--img_size', type=int, default=256, help='img size of per batch')
-parser.add_argument('--num_classes', type=int, default=1, help='seg num_classes')
-parser.add_argument('--seed', type=int, default=41, help='random seed')
-args = parser.parse_args()
-seed_torch(args.seed)
+parser.add_argument('--config', type=str, default='configs/train.yaml', help='path to config file')
+sys_args = parser.parse_args()
+config_dict = yaml_config(sys_args)
 
-model_name_hash = get_time_format() + "_" + str(random.randint(1, 1000))
-tmp_file_path = 'checkpoint/{}_model_{}_training.pth'.format(args.model, model_name_hash)
+# 从字典中提前把全局需要的变量取出来
+seed = config_dict['experiment']['seed']
+model_name = config_dict['model']['name']
+
+seed_torch(seed)
+
+model_name_hash = get_time_format() + "_" + str(random.randint(1, 9999))
+tmp_file_path = 'checkpoint/{}_model_{}_training.pth'.format(model_name, model_name_hash)
 
 
-def getDataloader(args):
-    img_size = args.img_size
-    if args.model == "SwinUnet":
+def getDataloader(config):
+    # 用查字典的方式，先把变量拿出来，这样就不需要改动底下的逻辑了
+    img_size = config['model']['img_size']
+    model_name = config['model']['name']
+    base_dir = config['experiment']['base_dir']
+    train_file_dir = config['experiment']['train_file_dir']
+    val_file_dir = config['experiment']['val_file_dir']
+    batch_size = config['train']['batch_size']
+
+    if model_name == "SwinUnet":
         img_size = 224
+
     train_transform = Compose([
         RandomRotate90(),
         transforms.Flip(),
@@ -52,25 +56,33 @@ def getDataloader(args):
         Resize(img_size, img_size),
         transforms.Normalize(),
     ])
-    db_train = MedicalDataSets(base_dir=args.base_dir, split="train",
-                            transform=train_transform, train_file_dir=args.train_file_dir, val_file_dir=args.val_file_dir)
-    db_val = MedicalDataSets(base_dir=args.base_dir, split="val", transform=val_transform,
-                          train_file_dir=args.train_file_dir, val_file_dir=args.val_file_dir)
+    
+    db_train = MedicalDataSets(base_dir=base_dir, split="train",
+                            transform=train_transform, train_file_dir=train_file_dir, val_file_dir=val_file_dir)
+    db_val = MedicalDataSets(base_dir=base_dir, split="val", transform=val_transform,
+                          train_file_dir=train_file_dir, val_file_dir=val_file_dir)
     print("train num:{}, val num:{}".format(len(db_train), len(db_val)))
 
-    trainloader = DataLoader(db_train, batch_size=args.batch_size, shuffle=True, num_workers=8, pin_memory=False)
-    valloader = DataLoader(db_val, batch_size=args.batch_size, shuffle=False, num_workers=4)
+    trainloader = DataLoader(db_train, batch_size=batch_size, shuffle=True, num_workers=8, pin_memory=False)
+    valloader = DataLoader(db_val, batch_size=batch_size, shuffle=False, num_workers=4)
 
     return trainloader, valloader
 
-def main(args):
-    base_lr = args.base_lr
 
-    trainloader, valloader = getDataloader(args=args)
+def main(config):
+    # 提取超参数
+    base_lr = config['train']['base_lr']
+    max_epoch = config['train']['epoch']
+    model_name = config['model']['name']
+    train_file_dir = config['experiment']['train_file_dir']
+    val_file_dir = config['experiment']['val_file_dir']
+
+    trainloader, valloader = getDataloader(config)
     
-    model = build_model(args)
+    # 把整本字典传给 builder，让它自己去查需要的参数
+    model = build_model(config)
 
-    print("train file dir:{} val file dir:{}".format(args.train_file_dir, args.val_file_dir))
+    print("train file dir:{} val file dir:{}".format(train_file_dir, val_file_dir))
 
     optimizer = optim.SGD(model.parameters(), lr=base_lr, momentum=0.9, weight_decay=0.0001)
     criterion = losses.__dict__['BCEDiceLoss']().cuda()
@@ -78,9 +90,8 @@ def main(args):
     print("{} iterations per epoch".format(len(trainloader)))
     best_iou = 0
     iter_num = 0
-    max_epoch = args.epoch
-
     max_iterations = len(trainloader) * max_epoch
+
     for epoch_num in range(max_epoch):
         model.train()
         avg_meters = {'loss': AverageMeter(),
@@ -143,11 +154,12 @@ def main(args):
 
     # 把临时文件保存为需要的文件
     if os.path.exists(tmp_file_path):
-        os.rename(tmp_file_path, "./checkpoint/{}_model_{}.pth".format(args.model, get_time_format()))
+        os.rename(tmp_file_path, "./checkpoint/{}_model_{}.pth".format(model_name, get_time_format()))
         return "Training Finished!"
     else:
         return "Training Finished, but no best ideal model!"
 
 
 if __name__ == "__main__":
-    main(args)
+    # 统一将字典传入主函数
+    main(config_dict)

@@ -1,15 +1,15 @@
-# src/network/builder.py
+from argparse import Namespace  # 引入原生解包神器
 
-def build_model(args, parser=None):
+def build_model(configs, parser=None):
     """
     使用数据驱动的 dict 映射构建模型（已移除 xxx_based 路径）
     """
     # 【自动提取核心模型名】即使传入 "U_Net_model_2026_07_04" 也能安全切出 "U_Net"
-    raw_model_name = args.model
+    raw_model_name = configs.model
     model_name = raw_model_name.split('_model_')[0] if '_model_' in raw_model_name else raw_model_name
 
-    num_classes = args.num_classes
-    img_size = args.img_size
+    num_classes = configs.num_classes
+    img_size = configs.img_size
     parser = parser
 
     # ============ 纯净的模型定义（移除了原作者的分类夹层） ============
@@ -57,16 +57,29 @@ def build_model(args, parser=None):
         from ..network.transUnet.transunet import TransUnet
         return TransUnet(img_ch=3, output_ch=num_classes)
 
-    def get_transformer_model():
-        # Transformer系列内部可能会套娃，这里根据你展平后的实际路径调整
-        from src.network.transformer_based_network import get_transformer_based_model
-        return get_transformer_based_model(
-            parser=parser, 
-            model_name=model_name, 
-            img_size=img_size, 
-            num_classes=num_classes, 
-            in_ch=3
-        )
+    def get_swinunet():
+        from src.network.swinUnet.vision_transformer import SwinUnet
+        from src.network.swinUnet.config import get_config
+
+        """
+        【get_config(Namespace(**configs['model']))流转说明】
+
+        1. config (原生字典)
+        - 来源：从 YAML 直接加载的数据源。
+        - 形态：纯正的 Python dict，只认键值对（如 config['model']['cfg']）。
+
+        2. Namespace (伪装者)
+        - 作用：将字典转为对象属性（把 ['cfg'] 变成 .cfg）。
+        - 目的：捏造一个和 argparse 输出一模一样的假对象，去“骗”底层代码。
+
+        3. swin_config (YACS 配置树)
+        - 形态：CV 领域特有的庞大、层层嵌套的 YACS 配置对象。
+        - 机制：拿着 Namespace 递来的图纸路径，在内部自动“生长”展开。
+        - 结果：生成带有 .MODEL.SWIN.PATCH_SIZE 这种复杂节点的大树。
+        """
+        swin_config = get_config(Namespace(**configs['model']))
+        
+        return SwinUnet(swin_config, img_size=img_size, num_classes=num_classes)
     
     # 模型大字典：核心映射表
     MODEL_REGISTRY = {
@@ -80,7 +93,7 @@ def build_model(args, parser=None):
         "CMUNeXt": get_cmunext,
         "Mobile_U_ViT": get_mobile_uvit,
         "TransUnet": get_transunet,
-        #"SwinUnet": get_swinunet,
+        "SwinUnet": get_swinunet,
         "MedT": get_med_t,
     }
 
