@@ -1,0 +1,18 @@
+# 忽略数据文件夹
+data/
+
+# 忽略模型权重和日志
+checkpoint/
+Model_Eval_logs/
+logs/
+tmp/
+runs/
+validation_results/
+*.png
+*.jpg
+*.jpeg
+
+# 忽略 Python 缓存
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
