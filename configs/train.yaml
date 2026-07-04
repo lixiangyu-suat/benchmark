@@ -7,7 +7,7 @@ experiment:
   val_file_dir: "busi_val.txt"     # dir
 
 model:
-  name: "SwinUnet"           # model_name, see in src/tils/modelloader/MODEL_REGISTRY 改天修改为新的地方.
+  name: "UNetplus"           # model_name, see in src/tils/modelloader/MODEL_REGISTRY 改天修改为新的地方.
   num_classes: 1             # seg num_classes
   img_size: 256              # img size of per batch (SwinUnet 内部一般会覆盖为 224)
   
@@ -27,6 +27,6 @@ model:
   throughput: false          # Test throughput only
 
 train:
-  epoch: 300                 # train epoch
-  batch_size: 4              # batch_size per gpu
+  epoch: 1                 # train epoch
+  batch_size: 8              # batch_size per gpu
   base_lr: 0.01              # segmentation network learning rate

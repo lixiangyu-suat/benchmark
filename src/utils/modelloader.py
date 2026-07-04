@@ -1,16 +1,15 @@
 from argparse import Namespace  # 引入原生解包神器
 
-def build_model(configs, parser=None):
+def build_model(configs):
     """
     使用数据驱动的 dict 映射构建模型（已移除 xxx_based 路径）
     """
     # 【自动提取核心模型名】即使传入 "U_Net_model_2026_07_04" 也能安全切出 "U_Net"
-    raw_model_name = configs.model
+    raw_model_name = configs["model"]["name"]
     model_name = raw_model_name.split('_model_')[0] if '_model_' in raw_model_name else raw_model_name
 
-    num_classes = configs.num_classes
-    img_size = configs.img_size
-    parser = parser
+    num_classes = configs["model"]["num_classes"]
+    img_size = configs["model"]["img_size"]
 
     # ============ 纯净的模型定义（移除了原作者的分类夹层） ============
     def get_unet():
