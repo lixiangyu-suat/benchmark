@@ -1,0 +1,33 @@
+data:
+  seed: 41                   # random seed
+  base_dir: "./data/busi"    # dir
+  train_file_dir: "busi_train.txt" # dir
+  val_file_dir: "busi_val.txt"     # dir
+
+# model choice: ........
+model:
+  name: "Mobile_U_ViT"       # model_name, see in src/tils/modelloader/MODEL_REGISTRY
+  num_classes: 1             # seg num_classes
+  SwinUnet:
+    opts: null                 # Modify config options by adding 'KEY VALUE' pairs.
+    cfg: "../../Swin-Unet/configs/swin_tiny_patch4_window7_224_lite.yaml" # path to config file
+    zip: "../data/transunet_ACDC.zip"                # use zipped dataset instead of folder dataset
+    cache_mode: "part"         # no: no cache, full: cache all data, part: sharding the dataset into nonoverlapping pieces and only cache one piece
+    resume: null               # resume from checkpoint
+    accumulation_steps: null   # gradient accumulation steps
+    use_checkpoint: false      # whether to use gradient checkpointing to save memory
+    amp_opt_level: "O1"        # mixed precision opt level, if O0, no amp is used
+    tag: null                  # tag of experiment
+    eval: false                # Perform evaluation only
+    throughput: false          # Test throughput only
+    batch_size: 8              # batch_size per gpu
+
+train:
+  batch_size: 8              # batch_size per gpu
+  img_size: 256              # img size of per batch (SwinUnet 内部一般会覆盖为 224)
+  epoch: 1                   # train epoch
+  base_lr: 0.01              # segmentation network learning rate
+
+eval:
+  batch_size: 8              # batch_size per gpu
+  img_size: 256              # img size of per batch (SwinUnet 内部一般会覆盖为 224)

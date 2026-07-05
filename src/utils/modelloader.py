@@ -1,6 +1,7 @@
 from argparse import Namespace  # 引入原生解包神器
+import torch # type:ignore
 
-def build_model(configs):
+def build_model(configs, device, eval = False):
     """
     使用数据驱动的 dict 映射构建模型（已移除 xxx_based 路径）
     """
@@ -9,7 +10,10 @@ def build_model(configs):
     model_name = raw_model_name.split('_model_')[0] if '_model_' in raw_model_name else raw_model_name
 
     num_classes = configs["model"]["num_classes"]
-    img_size = configs["model"]["img_size"]
+    if eval:
+        img_size = configs["eval"]["img_size"]
+    else:
+        img_size = configs["train"]["img_size"]
 
     # ============ 纯净的模型定义（移除了原作者的分类夹层） ============
     def get_unet():
@@ -61,6 +65,8 @@ def build_model(configs):
         from src.network.swinUnet.config import get_config
 
         """
+        yaml转化为argsparse:
+
         【get_config(Namespace(**configs['model']))流转说明】
 
         1. config (原生字典)
@@ -76,11 +82,10 @@ def build_model(configs):
         - 机制：拿着 Namespace 递来的图纸路径，在内部自动“生长”展开。
         - 结果：生成带有 .MODEL.SWIN.PATCH_SIZE 这种复杂节点的大树。
         """
-        swin_config = get_config(Namespace(**configs['model']))
+        swin_config = get_config(Namespace(**configs['model']['SwinUnet']))
         
         return SwinUnet(swin_config, img_size=img_size, num_classes=num_classes)
     
-    # 模型大字典：核心映射表
     MODEL_REGISTRY = {
         "U_Net": get_unet,
         "U_Net_re": get_unet_re,
@@ -94,11 +99,24 @@ def build_model(configs):
         "TransUnet": get_transunet,
         "SwinUnet": get_swinunet,
         "MedT": get_med_t,
-    }
+    } 
 
     if model_name not in MODEL_REGISTRY:
         raise ValueError(f"[!] 找不到模型: {model_name} (原始输入: {raw_model_name})。请检查拼写或在 builder.py 中注册。")
-
+    
     print(f"==> 正在构建模型骨架: {model_name}")
     model = MODEL_REGISTRY[model_name]()
+
+    model.to(device)
+    print(f"==> 正在选择训练设备: {device}")
+    
+    if torch.cuda.device_count() > 1:
+        print("Let's use", torch.cuda.device_count(), "GPUs!")
+        model = torch.nn.DataParallel(model)
+    
+    if eval:
+        model_path = f"./checkpoint/{raw_model_name}.pth"
+        model.load_state_dict(torch.load(model_path, map_location=device))
+        model.eval()
+    
     return model.cuda()

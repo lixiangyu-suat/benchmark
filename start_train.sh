@@ -1,2 +1,2 @@
 
-python main.py --config configs/train.yaml
+python main.py --cfg configs/config.yaml

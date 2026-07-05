@@ -1,7 +1,16 @@
 import os
-from torch.utils.data import Dataset
 import cv2
+from albumentations.augmentations import transforms # type: ignore
+from albumentations.core.composition import Compose # type: ignore
+from albumentations import RandomRotate90, Resize # type: ignore
+from torch.utils.data import Dataset # type: ignore
+from torch.utils.data import DataLoader # type: ignore
 
+def get_val_transform(img_size):
+    return Compose([
+        Resize(img_size, img_size),
+        transforms.Normalize(),
+    ])
 
 class MedicalDataSets(Dataset):
     def __init__(
@@ -55,3 +64,42 @@ class MedicalDataSets(Dataset):
 
         sample = {"image": image, "label": label, "idx": idx}
         return sample
+
+
+def get_data(config, eval = False):
+    # 用查字典的方式，先把变量拿出来，这样就不需要改动底下的逻辑了
+    if (not eval):
+        img_size = config['train']['img_size']
+    else:
+        img_size = config['eval']['img_size']
+    model_name = config['model']['name']
+    base_dir = config['data']['base_dir']
+    train_file_dir = config['data']['train_file_dir']
+    val_file_dir = config['data']['val_file_dir']
+    batch_size = config['train']['batch_size']
+
+    if model_name == "SwinUnet":
+        img_size = 224
+
+    train_transform = Compose([
+        RandomRotate90(),
+        transforms.Flip(),
+        Resize(img_size, img_size),
+        transforms.Normalize(),
+    ])
+
+    val_transform = Compose([
+        Resize(img_size, img_size),
+        transforms.Normalize(),
+    ])
+    
+    db_train = MedicalDataSets(base_dir=base_dir, split="train",
+                            transform=train_transform, train_file_dir=train_file_dir, val_file_dir=val_file_dir)
+    db_val = MedicalDataSets(base_dir=base_dir, split="val", transform=val_transform,
+                          train_file_dir=train_file_dir, val_file_dir=val_file_dir)
+    print("train num:{}, val num:{}".format(len(db_train), len(db_val)))
+
+    trainloader = DataLoader(db_train, batch_size=batch_size, shuffle=True, num_workers=8, pin_memory=False)
+    valloader = DataLoader(db_val, batch_size=batch_size, shuffle=False, num_workers=4)
+
+    return trainloader, valloader

@@ -4,11 +4,6 @@ import random
 import torch # type: ignore
 import torch.optim as optim # type: ignore
 
-from torch.utils.data import DataLoader # type: ignore
-from src.dataloader.dataset import MedicalDataSets
-from albumentations.augmentations import transforms # type: ignore
-from albumentations.core.composition import Compose # type: ignore
-from albumentations import RandomRotate90, Resize # type: ignore
 import src.utils.losses as losses
 from src.utils.util import AverageMeter
 from src.utils.metrics import iou_score
@@ -16,15 +11,16 @@ from src.utils.seeds import seed_torch
 from src.utils.timing import get_time_format
 from src.utils.modelloader import build_model
 from src.utils.get_yaml_config import yaml_config
+from src.utils.dataloader import get_data
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--config', type=str, default='configs/train.yaml', help='path to config file')
+parser.add_argument('--cfg', type=str, default='configs/train.yaml', help='path to config file')
 sys_args = parser.parse_args()
-config_dict = yaml_config(sys_args)
 
-# 从字典中提前把全局需要的变量取出来
-seed = config_dict['experiment']['seed']
+# yaml2dict
+config_dict = yaml_config(sys_args.cfg)
+seed = config_dict['data']['seed']
 model_name = config_dict['model']['name']
 
 seed_torch(seed)
@@ -33,54 +29,19 @@ model_name_hash = get_time_format() + "_" + str(random.randint(1, 9999))
 tmp_file_path = 'checkpoint/{}_model_{}_training.pth'.format(model_name, model_name_hash)
 
 
-def getDataloader(config):
-    # 用查字典的方式，先把变量拿出来，这样就不需要改动底下的逻辑了
-    img_size = config['model']['img_size']
-    model_name = config['model']['name']
-    base_dir = config['experiment']['base_dir']
-    train_file_dir = config['experiment']['train_file_dir']
-    val_file_dir = config['experiment']['val_file_dir']
-    batch_size = config['train']['batch_size']
-
-    if model_name == "SwinUnet":
-        img_size = 224
-
-    train_transform = Compose([
-        RandomRotate90(),
-        transforms.Flip(),
-        Resize(img_size, img_size),
-        transforms.Normalize(),
-    ])
-
-    val_transform = Compose([
-        Resize(img_size, img_size),
-        transforms.Normalize(),
-    ])
-    
-    db_train = MedicalDataSets(base_dir=base_dir, split="train",
-                            transform=train_transform, train_file_dir=train_file_dir, val_file_dir=val_file_dir)
-    db_val = MedicalDataSets(base_dir=base_dir, split="val", transform=val_transform,
-                          train_file_dir=train_file_dir, val_file_dir=val_file_dir)
-    print("train num:{}, val num:{}".format(len(db_train), len(db_val)))
-
-    trainloader = DataLoader(db_train, batch_size=batch_size, shuffle=True, num_workers=8, pin_memory=False)
-    valloader = DataLoader(db_val, batch_size=batch_size, shuffle=False, num_workers=4)
-
-    return trainloader, valloader
-
-
 def main(config):
     # 提取超参数
     base_lr = config['train']['base_lr']
     max_epoch = config['train']['epoch']
     model_name = config['model']['name']
-    train_file_dir = config['experiment']['train_file_dir']
-    val_file_dir = config['experiment']['val_file_dir']
+    train_file_dir = config['data']['train_file_dir']
+    val_file_dir = config['data']['val_file_dir']
 
-    trainloader, valloader = getDataloader(config)
+    trainloader, valloader = get_data(config)
     
     # 把整本字典传给 builder，让它自己去查需要的参数
-    model = build_model(config)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = build_model(config, device)
 
     print("train file dir:{} val file dir:{}".format(train_file_dir, val_file_dir))
 
@@ -92,7 +53,7 @@ def main(config):
     iter_num = 0
     max_iterations = len(trainloader) * max_epoch
 
-    for epoch_num in range(max_epoch):
+    for epoch_num in range(1, max_epoch+1):
         model.train()
         avg_meters = {'loss': AverageMeter(),
                       'iou': AverageMeter(),
@@ -116,11 +77,11 @@ def main(config):
             loss.backward()
             optimizer.step()
 
-            lr_ = base_lr * (1.0 - iter_num / max_iterations) ** 0.9
+            iter_num = iter_num + 1 # 需要放前面，迭代完一次之后立马+1，才能正确计算lr
+            lr_ = base_lr * (1.0 - iter_num / max_iterations) ** 0.9 # 严重问题：第一轮训练结束后，学习率赋值了初始base_lr，观察发现学习率的迭代是落后一轮的
             for param_group in optimizer.param_groups:
                 param_group['lr'] = lr_
-
-            iter_num = iter_num + 1
+            
             avg_meters['loss'].update(loss.item(), img_batch.size(0)) # 通过AverageMeter自动更新acc等评分
             avg_meters['iou'].update(iou, img_batch.size(0))
 
