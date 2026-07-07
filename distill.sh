@@ -29,7 +29,7 @@ fi
 
 
 echo
-echo "----------------蒸馏：$(TEACHER_NAME) >>> ${STUDENT_NAME} ----------------"
+echo "----------------蒸馏：$TEACHER_NAME >>> $STUDENT_NAME ----------------"
 echo
 # 运行第二个脚本
-python distill.py --cfg ./configs/config.yaml --teacher_model_ckpt "$(TEACHER_NAME)" --student_model_ckpt "${STUDENT_NAME}"
+python distill.py --cfg ./configs/config.yaml --teacher_model_ckpt "$TEACHER_NAME" --student_model_ckpt "$STUDENT_NAME"

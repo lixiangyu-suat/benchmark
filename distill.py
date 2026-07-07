@@ -22,8 +22,8 @@ def teacher(config_dict, teacher_model):
     device = next(teacher_model.parameters()).device
     teacher_model.eval()
     
-    # 从配置中获取验证集路径（你指定使用 config['eval']['val_file_dir']）
-    val_file_dir = config_dict['eval']['val_file_dir']
+    # 在训练集上学习
+    val_file_dir = config_dict['train']['train_file_dir']
     # 构建数据集（使用验证集 transform，通常无需数据增强）
     from src.utils.dataloader import get_val_transform, MedicalDataSets
     val_transform = get_val_transform(config_dict['eval']['img_size'])
@@ -44,7 +44,7 @@ def teacher(config_dict, teacher_model):
     with torch.no_grad():
         for batch in val_loader:
             images = batch['image'].to(device)
-            case_names = batch['case_name']  # 必须存在
+            case_names = batch['name']  # 必须存在
             outputs = teacher_model(images)
             probs = torch.sigmoid(outputs)  # 概率图，形状 [B, 1, H, W]
             
@@ -109,6 +109,17 @@ def student(config_dict, student_model, teacher_prob_dir):
         print(f"Epoch {epoch}/{max_epoch}, Average Loss: {avg_loss:.4f}")
         # 可以添加验证逻辑，这里暂略
 
+
+"""
+4. student 函数未保存模型
+训练结束后没有保存学生模型的 checkpoint，这会导致训练结果丢失。参考 main.py，应保存最佳模型。
+
+5. 学习率调度缺失
+main.py 中使用了动态学习率调整（lr_ = base_lr * (1.0 - iter_num / max_iterations) ** 0.9），你的 student 函数没有，可能影响收敛。建议加入或直接使用 torch.optim.lr_scheduler。
+
+6. teacher 函数每次运行覆盖之前的结果
+save_dir = "teacher_probs" 固定，如果多次运行不同教师，会覆盖。建议加入教师名字标识，例如 f"teacher_probs_{teacher_model_name}"。
+"""
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--cfg', type=str, default='configs/train.yaml', help='path to config file')
@@ -121,7 +132,7 @@ def main():
     seed = config_dict['data']['seed']
     seed_torch(seed)
 
-    teacher_model_name = sys_args.ckpt
+    teacher_model_name = sys_args.teacher_model_ckpt
     student_model_name = sys_args.student_model_ckpt
 
     teacher_model = build_model(config_dict, teacher_model_name, device, eval=True)

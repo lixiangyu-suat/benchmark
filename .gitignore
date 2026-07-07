@@ -11,6 +11,7 @@ validation_results/
 *.png
 *.jpg
 *.jpeg
+*.pt
 
 # 忽略 Python 缓存
 __pycache__/

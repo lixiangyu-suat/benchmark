@@ -1,8 +1,6 @@
 data:  #之后改为"general"
   seed: 41                   # random seed
   base_dir: "./data/busi"    # dir
-  train_file_dir: "busi_train.txt" # dir
-  val_file_dir: "busi_val.txt"     # dir
 
 # model choice: ........
 model:
@@ -27,9 +25,9 @@ train:
   img_size: 256              # img size of per batch (SwinUnet 内部一般会覆盖为 224)
   epoch: 1                   # train epoch
   base_lr: 0.01              # segmentation network learning rate
-  train_file_dir: ""
+  train_file_dir: "busi_train.txt" # dir
 
 eval:
   batch_size: 8              # batch_size per gpu
   img_size: 256              # img size of per batch (SwinUnet 内部一般会覆盖为 224)
-  val_file_dir: ""
+  val_file_dir: "busi_val.txt"     # dir
