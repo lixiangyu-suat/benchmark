@@ -1,4 +1,4 @@
-data:  #之后改为"general"
+data:
   seed: 41                   # random seed
   base_dir: "./data/busi"    # dir
   train_file_dir: "busi_train.txt" # dir
@@ -6,7 +6,6 @@ data:  #之后改为"general"
 
 # model choice: ........
 model:
-  # model_name, see in src/tils/modelloader/MODEL_REGISTRY
   num_classes: 1             # seg num_classes
   SwinUnet:
     opts: null                 # Modify config options by adding 'KEY VALUE' pairs.
@@ -25,11 +24,9 @@ model:
 train:
   batch_size: 8              # batch_size per gpu
   img_size: 256              # img size of per batch (SwinUnet 内部一般会覆盖为 224)
-  epoch: 1                   # train epoch
-  base_lr: 0.01              # segmentation network learning rate
-  train_file_dir: ""
+  epoch: 5                   # train epoch
+  base_lr: {0.01,0.02,0.03}              # segmentation network learning rate
 
 eval:
   batch_size: 8              # batch_size per gpu
   img_size: 256              # img size of per batch (SwinUnet 内部一般会覆盖为 224)
-  val_file_dir: ""

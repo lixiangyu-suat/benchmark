@@ -1,12 +1,13 @@
 from argparse import Namespace  # 引入原生解包神器
 import torch # type:ignore
 
-def build_model(configs, device, eval = False):
+def build_model(configs, raw_model_name, device, eval = False):
     """
     使用数据驱动的 dict 映射构建模型（已移除 xxx_based 路径）
     """
     # 【自动提取核心模型名】即使传入 "U_Net_model_2026_07_04" 也能安全切出 "U_Net"
-    raw_model_name = configs["model"]["name"]
+    # raw_model_name = configs["model"]["name"]
+    # 改为单独提出model会灵活一些
     model_name = raw_model_name.split('_model_')[0] if '_model_' in raw_model_name else raw_model_name
 
     num_classes = configs["model"]["num_classes"]
@@ -108,7 +109,7 @@ def build_model(configs, device, eval = False):
     model = MODEL_REGISTRY[model_name]()
 
     model.to(device)
-    print(f"==> 正在选择训练设备: {device}")
+    print(f"==> 正在选择设备: {device}")
     
     if torch.cuda.device_count() > 1:
         print("Let's use", torch.cuda.device_count(), "GPUs!")

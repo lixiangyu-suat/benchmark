@@ -16,12 +16,14 @@ from src.utils.dataloader import get_data
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--cfg', type=str, default='configs/train.yaml', help='path to config file')
+parser.add_argument('--ckpt', type=str, default='UNetplus_model_2026-07-04_23_17_55', help='checkpoint in ./checkpoint')
 sys_args = parser.parse_args()
 
 # yaml2dict
 config_dict = yaml_config(sys_args.cfg)
 seed = config_dict['data']['seed']
-model_name = config_dict['model']['name']
+
+model_name = sys_args.ckpt
 
 seed_torch(seed)
 
@@ -33,7 +35,6 @@ def main(config):
     # 提取超参数
     base_lr = config['train']['base_lr']
     max_epoch = config['train']['epoch']
-    model_name = config['model']['name']
     train_file_dir = config['data']['train_file_dir']
     val_file_dir = config['data']['val_file_dir']
 
@@ -41,7 +42,7 @@ def main(config):
     
     # 把整本字典传给 builder，让它自己去查需要的参数
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = build_model(config, device)
+    model = build_model(config, config_dict["model"]["name"], device)
 
     print("train file dir:{} val file dir:{}".format(train_file_dir, val_file_dir))
 

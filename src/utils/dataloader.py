@@ -1,5 +1,6 @@
 import os
 import cv2
+import torch
 from albumentations.augmentations import transforms # type: ignore
 from albumentations.core.composition import Compose # type: ignore
 from albumentations import RandomRotate90, Resize # type: ignore
@@ -11,6 +12,35 @@ def get_val_transform(img_size):
         Resize(img_size, img_size),
         transforms.Normalize(),
     ])
+
+def get_train_transform(img_size):
+    Compose([
+        RandomRotate90(),
+        transforms.Flip(),
+        Resize(img_size, img_size),
+        transforms.Normalize(),
+    ])
+
+class DistillationDataset(Dataset):
+    """包装 MedicalDataSets，额外加载教师软概率"""
+    def __init__(self, base_dataset, teacher_prob_dir):
+        self.base_dataset = base_dataset   # 这是一个 MedicalDataSets 实例
+        self.teacher_prob_dir = teacher_prob_dir
+
+    def __len__(self):
+        return len(self.base_dataset)
+
+    def __getitem__(self, idx):
+        sample = self.base_dataset[idx]   # 返回 {'image', 'label', 'name', 'idx'}
+        case_name = sample['name']
+        # 加载教师软概率
+        prob_path = os.path.join(self.teacher_prob_dir, f"{case_name}.pt")
+        teacher_prob = torch.load(prob_path)   # 形状 [1, H, W]
+        # 注意：如果教师预测时使用了不同的 resize，这里可能需要 resize 到当前图像尺寸
+        # 但一般保持一致，所以直接添加
+        sample['teacher_prob'] = teacher_prob
+        return sample
+    
 
 class MedicalDataSets(Dataset):
     def __init__(
@@ -46,6 +76,7 @@ class MedicalDataSets(Dataset):
     def __getitem__(self, idx):
 
         case = self.sample_list[idx]
+        case_name = os.path.splitext(os.path.basename(case))[0]
 
         image = cv2.imread(os.path.join(self._base_dir, 'images', case + '.png')) # OpenCV 读图, 减少精度损失
         label = \
@@ -62,7 +93,11 @@ class MedicalDataSets(Dataset):
         label = label.astype('float32') / 255 #平替 transforms.ToTensor(),像素值归一化
         label = label.transpose(2, 0, 1)
 
-        sample = {"image": image, "label": label, "idx": idx}
+        sample = {"image": image,
+                  "label": label, 
+                  "idx": idx,  
+                  "name": case_name
+                }
         return sample
 
 
@@ -81,17 +116,10 @@ def get_data(config, eval = False):
     if model_name == "SwinUnet":
         img_size = 224
 
-    train_transform = Compose([
-        RandomRotate90(),
-        transforms.Flip(),
-        Resize(img_size, img_size),
-        transforms.Normalize(),
-    ])
+    train_transform = get_val_transform(img_size)
 
-    val_transform = Compose([
-        Resize(img_size, img_size),
-        transforms.Normalize(),
-    ])
+    val_transform = get_val_transform(img_size)
+
     
     db_train = MedicalDataSets(base_dir=base_dir, split="train",
                             transform=train_transform, train_file_dir=train_file_dir, val_file_dir=val_file_dir)
@@ -102,4 +130,7 @@ def get_data(config, eval = False):
     trainloader = DataLoader(db_train, batch_size=batch_size, shuffle=True, num_workers=8, pin_memory=False)
     valloader = DataLoader(db_val, batch_size=batch_size, shuffle=False, num_workers=4)
 
-    return trainloader, valloader
+    if not eval:
+        return trainloader, valloader
+    else:
+        return valloader

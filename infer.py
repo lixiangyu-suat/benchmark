@@ -24,12 +24,10 @@ batch_size = config_dict['eval']['batch_size']
 img_size = config_dict['eval']['img_size']
 data = config_dict['data']
 
-# 显式使用model
-config_dict["model"]["name"] = sys_args.ckpt
 
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = build_model(config_dict, device, eval=True)
+    model = build_model(config_dict, sys_args.ckpt, device, eval=True)
     val_transform = get_val_transform(img_size)
 
     db_val = MedicalDataSets(base_dir=data['base_dir'], split="val", transform=val_transform, val_file_dir=data['val_file_dir'])
