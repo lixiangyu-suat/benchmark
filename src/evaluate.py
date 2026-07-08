@@ -1,4 +1,4 @@
-﻿import argparse
+import argparse
 import os
 import sys
 
@@ -13,7 +13,7 @@ from src.utils.config import load_config
 from src.utils.dataset import get_val_loader
 from src.utils.losses import BCEDiceLoss
 from src.utils.metrics import iou_score
-from src.utils.model_loader import build_model, load_checkpoint_meta
+from src.utils.model_loader import build_model, load_checkpoint_meta, resolve_ckpt_path
 from torchvision.utils import save_image
 
 
@@ -40,7 +40,7 @@ def main():
 
     model = build_model(config, args.model, device)
     state_dict, _, _ = load_checkpoint_meta(
-        f"./checkpoint/{args.model}.pth", device)
+        resolve_ckpt_path(args.model), device)
     model.load_state_dict(state_dict)
     model.eval()
 

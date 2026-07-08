@@ -22,6 +22,7 @@ from src.utils.model_loader import (
     load_checkpoint_meta,
     save_checkpoint,
     validate_model,
+    resolve_ckpt_path,
 )
 
 
@@ -48,7 +49,7 @@ def main():
     if args.ckpt is not None:
         model_name = validate_model(args.ckpt)
         model = build_model(config, args.ckpt, device)
-        ckpt_path = f"./checkpoint/{args.ckpt}.pth"
+        ckpt_path = resolve_ckpt_path(args.ckpt)
         sd, ckpt_epoch, best_iou = load_checkpoint_meta(ckpt_path, device)
         model.load_state_dict(sd)
         start_epoch = ckpt_epoch + 1
@@ -72,7 +73,9 @@ def main():
 
     # ── Logger ──────────────────────────────────────────────────
     ckpt_stem = f"{model_name}_model_{timestamp()}"
-    log_path = os.path.join("checkpoint", f"{ckpt_stem}.log")
+    ckpt_dir = os.path.join("checkpoint", ckpt_stem)
+    os.makedirs(ckpt_dir, exist_ok=True)
+    log_path = os.path.join(ckpt_dir, f"{ckpt_stem}.log")
     logger = CheckpointLogger(log_path)
     logger.log_pretrain(config)
     logger.log_custom_message(config.get("log", {}).get("custom_message", ""))
@@ -163,7 +166,7 @@ def main():
                 best_iou = meters["val_iou"].avg
                 os.makedirs("checkpoint", exist_ok=True)
                 save_checkpoint(
-                    os.path.join("checkpoint", f"{ckpt_stem}.pth"),
+                    os.path.join(ckpt_dir, f"{ckpt_stem}.pth"),
                     model, epoch, best_iou,
                 )
                 print(f"  => saved best model (val_iou: {best_iou:.4f})")
@@ -176,7 +179,7 @@ def main():
     if interrupted:
         os.makedirs("checkpoint", exist_ok=True)
         save_checkpoint(
-            os.path.join("checkpoint", f"{ckpt_stem}_interrupted.pth"),
+            os.path.join(ckpt_dir, f"{ckpt_stem}_interrupted.pth"),
             model, epoch, best_iou,
         )
         logger.log_training("--- TRAINING INTERRUPTED ---")

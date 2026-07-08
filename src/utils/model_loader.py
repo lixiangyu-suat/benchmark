@@ -1,4 +1,4 @@
-﻿from argparse import Namespace
+from argparse import Namespace
 import os
 
 import yaml
@@ -165,3 +165,14 @@ def save_checkpoint(path, model, epoch, best_iou):
         "model_state_dict": model.state_dict(),
         "best_iou": best_iou,
     }, path)
+
+def resolve_ckpt_path(stem, suffix=".pth"):
+    """Resolve checkpoint path, trying subfolder first, then flat layout.
+
+    New (preferred): checkpoint/{stem}/{stem}{suffix}
+    Old (fallback):  checkpoint/{stem}{suffix}
+    """
+    sub = os.path.join("checkpoint", stem, f"{stem}{suffix}")
+    if os.path.exists(sub):
+        return sub
+    return os.path.join("checkpoint", f"{stem}{suffix}")

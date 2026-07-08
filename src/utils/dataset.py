@@ -88,7 +88,7 @@ class DistillationDataset(Dataset):
     def __getitem__(self, idx):
         sample = self.base_dataset[idx]
         prob_path = os.path.join(self.teacher_prob_dir, f"{sample['name']}.pt")
-        sample["teacher_prob"] = torch.load(prob_path)
+        sample["teacher_prob"] = torch.load(prob_path, weights_only=True)
         return sample
 
 

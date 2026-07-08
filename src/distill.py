@@ -2,6 +2,7 @@ import argparse
 import os
 import signal
 import sys
+import shutil
 
 _PROJ_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _PROJ_ROOT not in sys.path:
@@ -22,6 +23,7 @@ from src.utils.model_loader import (
     load_checkpoint_meta,
     save_checkpoint,
     validate_model,
+    resolve_ckpt_path,
 )
 
 
@@ -151,7 +153,7 @@ def main():
     print(f"Loading teacher from: {args.teacher}")
     teacher = build_model(config, args.teacher, device)
     teacher_sd, _, _ = load_checkpoint_meta(
-        f"./checkpoint/{args.teacher}.pth", device)
+        resolve_ckpt_path(args.teacher), device)
     teacher.load_state_dict(teacher_sd)
 
     if args.resume:
@@ -159,7 +161,7 @@ def main():
         student_model_name = validate_model(args.student)
         student = build_model(config, args.student, device)
         student_sd, ckpt_epoch, _ = load_checkpoint_meta(
-            f"./checkpoint/{args.student}.pth", device)
+            resolve_ckpt_path(args.student), device)
         student.load_state_dict(student_sd)
         start_epoch = ckpt_epoch + 1
 
@@ -175,7 +177,9 @@ def main():
     print(f"Teacher probabilities saved to {teacher_prob_dir}")
 
     ckpt_stem = f"{student_model_name}_model_{timestamp()}"
-    log_path = os.path.join("checkpoint", f"{ckpt_stem}.log")
+    ckpt_dir = os.path.join("checkpoint", ckpt_stem)
+    os.makedirs(ckpt_dir, exist_ok=True)
+    log_path = os.path.join(ckpt_dir, f"{ckpt_stem}.log")
     logger = CheckpointLogger(log_path)
     logger.log_pretrain(config)
     custom_msg = config.get("log", {}).get("custom_message", "")
@@ -188,15 +192,16 @@ def main():
 
     os.makedirs("checkpoint", exist_ok=True)
     if interrupted:
-        ckpt_path = os.path.join("checkpoint", f"{ckpt_stem}_interrupted.pth")
+        ckpt_path = os.path.join(ckpt_dir, f"{ckpt_stem}_interrupted.pth")
         logger.log_training("--- DISTILLATION INTERRUPTED ---")
         logger.log_training(f"Last completed epoch: {last_epoch}")
         print(f"=> Interrupted, saving to {ckpt_stem}_interrupted.pth")
     else:
-        ckpt_path = os.path.join("checkpoint", f"{ckpt_stem}.pth")
+        ckpt_path = os.path.join(ckpt_dir, f"{ckpt_stem}.pth")
         print(f"=> Distillation finished (best loss: {best_loss:.4f})")
 
     save_checkpoint(ckpt_path, student, last_epoch, best_loss)
+    shutil.rmtree("teacher_probs", ignore_errors=True)
     logger.log_architecture(student,
                             (1, 3, config["train"]["img_size"],
                              config["train"]["img_size"]))
