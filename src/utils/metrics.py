@@ -11,7 +11,7 @@ def get_accuracy(SR, GT, threshold=0.5):
 
 
 def get_sensitivity(SR, GT, threshold=0.5):
-    # Sensitivity == Recall
+    """Sensitivity == Recall"""
     SE = 0
     SR = SR > threshold
     GT = GT == torch.max(GT)
@@ -34,7 +34,7 @@ def get_specificity(SR, GT, threshold=0.5):
 def get_precision(SR, GT, threshold=0.5):
     PC = 0
     SR = SR > threshold
-    GT = GT== torch.max(GT)
+    GT = GT == torch.max(GT)
     TP = ((SR == 1).byte() + (GT == 1).byte()) == 2
     FP = ((SR == 1).byte() + (GT == 0).byte()) == 2
     PC = float(torch.sum(TP))/(float(torch.sum(TP+FP)) + 1e-6)
@@ -42,6 +42,10 @@ def get_precision(SR, GT, threshold=0.5):
 
 
 def iou_score(output, target):
+    """Compute IoU, Dice, and pixel-wise metrics at 0.5 threshold.
+
+    Returns: iou, dice, SE, PC, F1, SP, ACC
+    """
     smooth = 1e-5
 
     if torch.is_tensor(output):
@@ -50,19 +54,19 @@ def iou_score(output, target):
         target = target.data.cpu().numpy()
     output_ = output > 0.5
     target_ = target > 0.5
-    
+
     intersection = (output_ & target_).sum()
     union = (output_ | target_).sum()
     iou = (intersection + smooth) / (union + smooth)
-    dice = (2 * iou) / (iou+1)
-    
-    output_ = torch.tensor(output_)
-    target_ = torch.tensor(target_)
-    SE = get_sensitivity(output_, target_, threshold=0.5)
-    PC = get_precision(output_, target_, threshold=0.5)
-    SP = get_specificity(output_, target_, threshold=0.5)
-    ACC = get_accuracy(output_, target_, threshold=0.5)
-    F1 = 2*SE*PC/(SE+PC + 1e-6)
+    dice = (2 * iou) / (iou + 1)
+
+    output_t = torch.tensor(output_)
+    target_t = torch.tensor(target_)
+    SE = get_sensitivity(output_t, target_t, threshold=0.5)
+    PC = get_precision(output_t, target_t, threshold=0.5)
+    SP = get_specificity(output_t, target_t, threshold=0.5)
+    ACC = get_accuracy(output_t, target_t, threshold=0.5)
+    F1 = 2 * SE * PC / (SE + PC + 1e-6)
     return iou, dice, SE, PC, F1, SP, ACC
 
 
@@ -71,5 +75,5 @@ def dice_coef(output, target):
     output = torch.sigmoid(output).view(-1).data.cpu().numpy()
     target = target.view(-1).data.cpu().numpy()
     intersection = (output * target).sum()
-    return (2. * intersection + smooth) / \
-        (output.sum() + target.sum() + smooth)
+    return (2. * intersection + smooth) / (output.sum() + target.sum() + smooth)
+

@@ -1,117 +1,151 @@
-# Medical 2D Image Segmentation Benchmarks
+﻿# Medical Image Segmentation Benchmark
 
-![ushape](img/ushape.png)
+> 在 xxx 项目的基础上，做了如下修改：
+> - 解耦了训练、评估、蒸馏三个管线，各自独立入口
+> - 新增了 checkpoint 配对日志系统（每个 .pth 同级生成 .log）
+> - 统一了模型加载接口，支持从 checkpoint 恢复训练
+> - 清理了配置体系，删除了大量混乱的遗留代码
+> - 将工具函数按职责拆分到 `src/utils/`，并补全了缺失的 `__init__.py`
+> - 新增 `configs/modellists.yaml`，用于集中管理可用的模型列表和校验
+> - 后续 TODO：补充新作者信息
 
-For easy evaluation and fair comparison on 2D medical image segmentation method, we aim to collect and build a medical image segmentation U-shape architecture benchmark to implement the medical 2d image segmentation tasks.
+---
 
-##### News 🥰
-
-
-- Mobile U-ViT is now on this repo ! 😘
-- CMUNeXt is now on this repo ! 😘
-
-This repositories has collected and re-implemented medical image segmentation networks based on U-shape architecture are followed:
-
-|     Network     |                        Original code                         |                          Reference                           |
-| :-------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
-|      U-Net      | [Caffe](http://lmb.informatik.uni-freiburg.de/people/ronneber/u-net) |      [MICCAI'15](https://arxiv.org/pdf/1505.04597.pdf)       |
-| Attention U-Net | [Pytorch](https://github.com/ozan-oktay/Attention-Gated-Networks) |       [Arxiv'18](https://arxiv.org/pdf/1804.03999.pdf)       |
-|     U-Net++     |    [Pytorch](https://github.com/MrGiovanni/UNetPlusPlus)     | [MICCAI'18](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7329239/pdf/nihms-1600717.pdf) |
-|    U-Net 3+     |    [Pytorch](https://github.com/ZJUGiveLab/UNet-Version)     |        [ICASSP'20](https://arxiv.org/pdf/2004.08790)         |
-|    TransUnet    |      [Pytorch](https://github.com/Beckschen/TransUNet)       |       [Arxiv'21](https://arxiv.org/pdf/2102.04306.pdf)       |
-|      MedT       | [Pytorch](https://github.com/jeya-maria-jose/Medical-Transformer) |      [MICCAI'21](https://arxiv.org/pdf/2102.10662.pdf)       |
-|      UNeXt      | [Pytorch](https://github.com/jeya-maria-jose/UNeXt-pytorch)  |      [MICCAI'22](https://arxiv.org/pdf/2203.04967.pdf)       |
-|    SwinUnet     |    [Pytorch](https://github.com/HuCaoFighting/Swin-Unet)     |       [ECCV'22](https://arxiv.org/pdf/2105.05537.pdf)        |
-|     CMU-Net     |       [Pytorch](https://github.com/FengheTan9/CMU-Net)       |       [ISBI'23](https://arxiv.org/pdf/2210.13012.pdf)        |
-|     CMUNeXt     |       [Pytorch](https://github.com/FengheTan9/CMUNeXt)       |       [ISBI'24](https://arxiv.org/pdf/2308.01239.pdf)       |
-|  Mobile U-ViT   |       [Pytorch](https://github.com/FengheTan9/Mobile-U-ViT)  |       [ACM MM'25](https://arxiv.org/pdf/2508.01064.pdf)       |
-## Datasets
-
-Please put the [BUSI](https://www.kaggle.com/aryashah2k/breast-ultrasound-images-dataset) dataset or your own dataset as the following architecture. 
+## 目录结构
 
 ```
-├── Medical-Image-Segmentation-Benchmarks
-    ├── data
-        ├── busi
-            ├── images
-            |   ├── benign (10).png
-            │   ├── malignant (17).png
-            │   ├── ...
-            |
-            └── masks
-                ├── 0
-                |   ├── benign (10).png
-                |   ├── malignant (17).png
-                |   ├── ...
-        ├── your 2D dataset
-            ├── images
-            |   ├── 0a7e06.png
-            │   ├── 0aab0a.png
-            │   ├── 0b1761.png
-            │   ├── ...
-            |
-            └── masks
-                ├── 0
-                |   ├── 0a7e06.png
-                |   ├── 0aab0a.png
-                |   ├── 0b1761.png
-                |   ├── ...
-    ├── src
-    ├── main.py
-    ├── split.py
+benchmark/
+├── configs/
+│   ├── config.yaml            # 主配置文件
+│   └── modellists.yaml        # 模型注册表（新增模型时需同步更新）
+├── src/
+│   ├── train.py                # 训练入口
+│   ├── evaluate.py             # 评估入口
+│   ├── distill.py              # 蒸馏入口
+│   ├── utils/
+│   │   ├── config.py           # YAML 配置加载
+│   │   ├── model_loader.py     # 模型注册表 + 构建
+│   │   ├── dataset.py          # 数据加载 + 蒸馏数据集包装
+│   │   ├── metrics.py          # 评估指标（IoU, Dice, SE, PC, F1, ACC）
+│   │   ├── losses.py           # 损失函数（BCEDiceLoss, KL）
+│   │   ├── logger.py           # Checkpoint 配对日志系统
+│   │   └── helpers.py          # 工具函数（种子、计时、参数统计）
+│   └── network/                # 所有模型架构（保留不动）
+├── scripts/
+│   ├── train.sh                # 训练快捷脚本（仅备忘用）
+│   ├── eval.sh                 # 评估快捷脚本（仅备忘用）
+│   └── distill.sh              # 蒸馏快捷脚本（仅备忘用）
+├── checkpoint/                 # .pth + .log 配对存放
+├── data/                       # 数据集
+├── teacher_probs/              # 蒸馏时生成的教师 soft labels
+└── validation_results/         # 评估时保存的预测可视化
 ```
 
-## Environments
+---
 
-- GPU: NVIDIA GeForce RTX4090 GPU
-- Pytorch: 1.13.0 cuda 11.7
-- cudatoolkit: 11.7.1
-- scikit-learn: 1.0.2
-- albumentations: 1.2.0
+## 可用模型
 
-## Training
+见 `configs/modellists.yaml`：
 
-You can first split your dataset:
-
-```python
-python split.py --dataset_root ./data --dataset_name busi
+```bash
+grep -E "^  [A-Z]" configs/modellists.yaml
 ```
 
-Then, training and validating your dataset:
+当前内置 12 个架构：
 
-```python
-python main.py --model [MobileUViT/CMUNeXt/CMUNet/TransUnet/...] --base_dir ./data/busi --train_file_dir busi_train.txt --val_file_dir busi_val.txt --base_lr 0.01 --epoch 300 --batch_size 8
+| 模型 | 类别 | 说明 |
+|---|---|---|
+| U_Net | cnn | 原始 U-Net |
+| U_Net_re | cnn | 修订版 U-Net |
+| AttU_Net | cnn | Attention U-Net |
+| UNetplus | cnn | U-Net++ (ResNet34 backbone) |
+| UNet3plus | cnn | U-Net 3+ |
+| UNext | cnn | U-NeXt |
+| CMUNet | cnn | CMU-Net |
+| CMUNeXt | cnn | CMU-NeXt |
+| Mobile_U_ViT | hybrid | Mobile U-ViT |
+| MedT | transformer | Medical Transformer |
+| TransUnet | transformer | TransUNet |
+| SwinUnet | transformer | SwinUNet |
+
+新增模型时，需要：
+1. 把模型代码放到 `src/network/` 下
+2. 在 `src/utils/model_loader.py` 里 import 并注册工厂函数
+3. 在 `configs/modellists.yaml` 里加一条记录
+
+---
+
+## 使用方法
+
+项目在 WSL2 的 conda 环境下运行。推荐直接调用 Python 入口（避免 `bash` 子 shell 丢失 conda 环境的问题），`scripts/` 下的 `.sh` 文件保留仅做命令格式备忘。
+
+```bash
+conda activate your_env
+cd /mnt/f/Workspace/valid_paper_AI/benchmark
 ```
 
-## Inference
+### 训练
 
-```python
-python infer.py --model [MobileUViT/CMUNeXt/CMUNet/TransUnet/...] --model_path [.pth] --base_dir ./data/busi --val_file_dir busi_val.txt --img_size 256 --num_classes 1
+```bash
+# 训练：新训练 U_Net
+source scripts/train.sh U_Net
+# 训练：从 checkpoint 恢复 UNetplus
+source scripts/train.sh UNetplus_model_2026-07-04_23_17_55
 ```
 
+模型名在校验时与 `modellists.yaml` 比对，输入有误会提前提示，不会走到 Python import 报错。
 
-## Results on BUSI
+训练结束会在 `checkpoint/` 下生成一对文件：
+- `{model_name}_model_{timestamp}.pth` — 模型权重
+- `{model_name}_model_{timestamp}.log` — 日志
 
-We train the U-shape based networks with [BUSI dataset](https://www.kaggle.com/aryashah2k/breast-ultrasound-images-dataset). The BUSI collected 780 breast ultrasound images, including normal, benign and malignant cases of breast cancer with their corresponding segmentation results. **We only used benign and malignant images (647 images)**. And we randomly split thrice in [/data](https://github.com/FengheTan9/Medical-Image-Segmentation-Benchmarks/tree/main/data), 70% for training and 30% for validation. In addition, we resize all the images 256×256 and perform random rotation and flip for data augmentation.
+日志按以下顺序组织：
+```
+=== PRETRAIN PARAMS ===              ← 完整的 YAML 配置
+=== CUSTOM MESSAGE ===               ← 来自 config.yaml log.custom_message
+=== POSTTRAIN RESULTS ===            ← 最终指标（对齐排版）
+=== MODEL ARCHITECTURE ===           ← torchinfo summary
+=== TRAINING LOG ===                 ← 每 epoch 的输出
+```
 
-|     Method      |   Params (M)    |        FPS        |     GFLOPs      |          IoU          |       F1-value        |
-| :-------------: | :-------------: | :---------------: | :-------------: | :-------------------: | :-------------------: |
-|      U-Net      |      34.52      |      139.32       |      65.52      |      68.61±2.86       |      76.97±3.10       |
-| Attention U-Net |      34.87      |      129.92       |      66.63      |      68.55±3.22       |      76.88±3.50       |
-|     U-Net++     |      26.90      |      125.50       |      37.62      |      69.49±2.94       |      78.06±3.25       |
-|     U-Net3+     |      26.97      |       50.60       |     199.74      |      68.38±3.35       |      76.88±3.68       |
-|    TransUnet    |     105.32      |      112.95       |      38.52      |      71.39±2.37       |      79.85±2.59       |
-|      MedT       | **<u>1.37</u>** |       22.97       |      2.40       |      63.36±1.56       |      73.37±1.63       |
-|    SwinUnet     |      27.14      |      392.21       |      5.91       |      54.11±2.29       |      65.46±1.91       |
-|      UNeXt      |      1.47       | **<u>650.48</u>** | **<u>0.58</u>** |      65.04±2.71       |      74.16±2.84       |
-|     CMU-Net     |      49.93      |       93.19       |      91.25      |      71.42±2.65       |      79.49±2.92       |
-|     CMUNeXt     |      3.14       |      471.43       |      7.41       |      71.56±2.43       |      79.86±2.58       |
-|   Mobile U-ViT  |      1.39       |      326.24       |      2.51       | **<u>72.88±2.72</u>** | **<u>81.18±3.05</u>** |
+### 评估
 
-## Acknowledgements:
+```bash
+# 评估：传 checkpoint stem
+source scripts/eval.sh UNetplus_model_2026-07-04_23_17_55
+```
 
-This code-base uses helper functions from [CMU-Net](https://github.com/FengheTan9/CMU-Net) and [Image_Segmentation](https://github.com/LeeJunHyun/Image_Segmentation).
+输出内容：
+1. `torchinfo summary` 打印模型架构
+2. 验证集指标：val_loss, val_iou, val_dice, val_SE, val_PC, val_F1, val_ACC
 
-## Other QS:
+### 蒸馏
 
-If you have any questions or suggestions about this project, please contact me through email: 543759045@qq.com
+```bash
+# 蒸馏：教师从 checkpoint 加载，学生从头训练
+source scripts/distill.sh UNetplus_model_2026-07-04_23_17_55 Mobile_U_ViT
+
+# 蒸馏：教师 + 学生都从 checkpoint 恢复
+source scripts/distill.sh UNetplus_model_2026-07-04_23_17_55 Mobile_U_ViT_model_2026-07-06_15_41_15
+```
+
+流程：
+1. 教师从 checkpoint 加载 → 对训练集生成 soft labels
+2. 学生构建（新模型或从 checkpoint 恢复）
+3. 用 BCE-Dice + MSE distillation loss 训练
+4. 保存学生 checkpoint + 配对 log
+
+---
+
+## 配置说明
+
+详见 `configs/config.yaml`：
+
+| 字段 | 说明 |
+|---|---|
+| `train.epoch` | 训练轮数 |
+| `train.base_lr` | 初始学习率 |
+| `log.custom_message` | 嵌入 checkpoint log 的自定义文本 |
+| `data.*` | 数据集路径和划分文件 |
+
+模型名不再放在 yaml 里，改为通过命令行 `--model` 传入，确保每次运行都能肉眼确认模型名字输对了没有。

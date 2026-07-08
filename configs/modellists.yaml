@@ -1,0 +1,39 @@
+﻿# Available model architectures.
+# When adding a new model, update this file AND src/utils/model_loader.py.
+models:
+  U_Net:
+    description: "Original U-Net"
+    category: "cnn"
+  U_Net_re:
+    description: "Revised U-Net"
+    category: "cnn"
+  AttU_Net:
+    description: "Attention U-Net"
+    category: "cnn"
+  UNetplus:
+    description: "U-Net++ (ResNet34 backbone)"
+    category: "cnn"
+  UNet3plus:
+    description: "U-Net 3+"
+    category: "cnn"
+  UNext:
+    description: "U-NeXt"
+    category: "cnn"
+  CMUNet:
+    description: "CMU-Net"
+    category: "cnn"
+  CMUNeXt:
+    description: "CMU-NeXt"
+    category: "cnn"
+  Mobile_U_ViT:
+    description: "Mobile U-ViT hybrid"
+    category: "hybrid"
+  MedT:
+    description: "Medical Transformer (axial attention)"
+    category: "transformer"
+  TransUnet:
+    description: "TransUNet (ViT + CNN)"
+    category: "transformer"
+  SwinUnet:
+    description: "SwinUNet (shifted-window Transformer)"
+    category: "transformer"

@@ -3,34 +3,33 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-__all__ = ['BCEDiceLoss']
+__all__ = ["BCEDiceLoss"]
 
 
 class BCEDiceLoss(nn.Module):
+    """Binary cross-entropy + Dice loss (equal weighting)."""
+
     def __init__(self):
         super().__init__()
 
     def forward(self, input, target):
         bce = F.binary_cross_entropy_with_logits(input, target)
         smooth = 1e-5
-        input = torch.sigmoid(input)
+        input_sig = torch.sigmoid(input)
         num = target.size(0)
-        input = input.view(num, -1)
+        input_sig = input_sig.view(num, -1)
         target = target.view(num, -1)
-        intersection = (input * target)
-        dice = (2. * intersection.sum(1) + smooth) / (input.sum(1) + target.sum(1) + smooth)
+        intersection = (input_sig * target)
+        dice = (2. * intersection.sum(1) + smooth) / (input_sig.sum(1) + target.sum(1) + smooth)
         dice = 1 - dice.sum() / num
         return 0.5 * bce + dice
 
 
-def compute_kl_loss(p, q): # 可能可以用来跑半监督学习的代码；平时作为工具箱（不被）使用
+def compute_kl_loss(p, q):
+    """Symmetric KL divergence (useful for semi-supervised learning)."""
     p_loss = F.kl_div(F.log_softmax(p, dim=-1),
-                      F.softmax(q, dim=-1), reduction='none')
+                      F.softmax(q, dim=-1), reduction="none")
     q_loss = F.kl_div(F.log_softmax(q, dim=-1),
-                      F.softmax(p, dim=-1), reduction='none')
+                      F.softmax(p, dim=-1), reduction="none")
+    return (p_loss.mean() + q_loss.mean()) / 2
 
-    p_loss = p_loss.mean()
-    q_loss = q_loss.mean()
-
-    loss = (p_loss + q_loss) / 2
-    return loss

@@ -1,19 +1,22 @@
-# 忽略数据文件夹
+﻿# Data
 data/
 
-# 忽略模型权重和日志
+# Checkpoints & logs
 checkpoint/
 Model_Eval_logs/
 logs/
 tmp/
 runs/
+teacher_probs/
 validation_results/
+
+# Generated assets
 *.png
 *.jpg
 *.jpeg
 *.pt
 
-# 忽略 Python 缓存
+# Python cache
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
