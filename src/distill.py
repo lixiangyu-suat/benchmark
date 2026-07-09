@@ -14,8 +14,9 @@ from torch.utils.data import DataLoader
 
 from src.utils.config import load_config
 from src.utils.dataset import (DistillationDataset, MedicalDataset,
+                                load_split_ids,
                                 train_transform, val_transform)
-from src.utils.helpers import seed_everything, timestamp
+from src.utils.helpers import seed_everything, timestamp, timestamp_short
 from src.utils.losses import BCEDiceLoss
 from src.utils.logger import CheckpointLogger
 from src.utils.model_loader import (
@@ -47,10 +48,12 @@ def generate_teacher_probs(config, teacher_model, save_dir):
 
     img_size = config["train"]["img_size"]
     base_dir = config["data"]["base_dir"]
-    train_file = config["data"]["train_file_dir"]
+    train_ids, _ = load_split_ids(
+        base_dir, config["data"]["seed"], config["data"].get("val_split", 0.3)
+    )
 
     loader = DataLoader(
-        MedicalDataset(base_dir, "train", val_transform(img_size), train_file),
+        MedicalDataset(base_dir, "train", val_transform(img_size), train_ids),
         batch_size=config["train"]["batch_size"],
         shuffle=False, num_workers=4, pin_memory=True,
     )
@@ -74,7 +77,9 @@ def train_student(config, student_model, teacher_prob_dir, logger,
 
     img_size = config["train"]["img_size"]
     base_dir = config["data"]["base_dir"]
-    train_file = config["data"]["train_file_dir"]
+    train_ids, _ = load_split_ids(
+        base_dir, config["data"]["seed"], config["data"].get("val_split", 0.3)
+    )
     batch_size = config["train"]["batch_size"]
     base_lr = config["train"]["base_lr"]
     add_epochs = config["train"]["epoch"]
@@ -82,7 +87,7 @@ def train_student(config, student_model, teacher_prob_dir, logger,
     end_epoch = start_epoch + add_epochs - 1
 
     base_dataset = MedicalDataset(base_dir, "train",
-                                  train_transform(img_size), train_file)
+                                  train_transform(img_size), train_ids)
     distill_dataset = DistillationDataset(base_dataset, teacher_prob_dir)
     train_loader = DataLoader(
         distill_dataset, batch_size=batch_size,
@@ -176,10 +181,9 @@ def main():
     teacher_prob_dir = generate_teacher_probs(config, teacher, "teacher_probs")
     print(f"Teacher probabilities saved to {teacher_prob_dir}")
 
-    ckpt_stem = f"{student_model_name}_model_{timestamp()}"
-    ckpt_dir = os.path.join("checkpoint", ckpt_stem)
-    os.makedirs(ckpt_dir, exist_ok=True)
-    log_path = os.path.join(ckpt_dir, f"{ckpt_stem}.log")
+    ckpt_stem = f"{timestamp_short()}_{student_model_name}"
+    os.makedirs("checkpoint", exist_ok=True)
+    log_path = os.path.join("checkpoint", f"{ckpt_stem}.log")
     logger = CheckpointLogger(log_path)
     logger.log_pretrain(config)
     custom_msg = config.get("log", {}).get("custom_message", "")
@@ -192,12 +196,12 @@ def main():
 
     os.makedirs("checkpoint", exist_ok=True)
     if interrupted:
-        ckpt_path = os.path.join(ckpt_dir, f"{ckpt_stem}_interrupted.pth")
+        ckpt_path = os.path.join("checkpoint", f"{ckpt_stem}.pth")
         logger.log_training("--- DISTILLATION INTERRUPTED ---")
         logger.log_training(f"Last completed epoch: {last_epoch}")
-        print(f"=> Interrupted, saving to {ckpt_stem}_interrupted.pth")
+        print(f"=> Interrupted, saving to {ckpt_stem}.pth")
     else:
-        ckpt_path = os.path.join(ckpt_dir, f"{ckpt_stem}.pth")
+        ckpt_path = os.path.join("checkpoint", f"{ckpt_stem}.pth")
         print(f"=> Distillation finished (best loss: {best_loss:.4f})")
 
     save_checkpoint(ckpt_path, student, last_epoch, best_loss)

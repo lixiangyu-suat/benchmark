@@ -19,8 +19,17 @@ def seed_everything(seed):
 
 
 def timestamp():
-    """Return current time formatted as YYYY-MM-DD_HH_MM_SS."""
+    """Return current time formatted as YYYY-MM-DD_HH_MM_SS (full precision)."""
     return datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
+
+
+def timestamp_short():
+    """Return current time formatted as YYYYMMDD_HHMM (8+4 digits, sortable).
+
+    Designed for checkpoint naming so that alphabetical order equals
+    chronological order.
+    """
+    return datetime.now().strftime("%Y%m%d_%H%M")
 
 
 def count_params(model):
@@ -45,4 +54,3 @@ class AverageMeter:
         self.sum += val * n
         self.count += n
         self.avg = self.sum / self.count
-

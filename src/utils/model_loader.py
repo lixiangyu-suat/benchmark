@@ -34,10 +34,26 @@ def validate_model(raw_name):
 
 
 def _extract_model_name(raw_name):
-    """Extract architecture name from a checkpoint or plain model name."""
-    if "_model_" in raw_name:
-        return raw_name.split("_model_")[0]
-    return raw_name
+    """Extract architecture name from a checkpoint or plain model name.
+
+    Supports three formats:
+      - New:   "20260708_1624_U_Net"            (split by ``_``, first 2 segments are 8+4 digits)
+      - Old:   "U_Net_model_2026-07-08_16_24_02"  (contains ``_model_``)
+      - Plain: "U_Net"
+    """
+    # Strip _interrupted suffix before parsing.
+    clean = raw_name.removesuffix("_interrupted")
+
+    # New format: first two segments are 8-digit date + 4-digit time.
+    parts = clean.split("_", 2)
+    if len(parts) == 3 and parts[0].isdigit() and len(parts[0]) == 8 \
+                        and parts[1].isdigit() and len(parts[1]) == 4:
+        return parts[2]
+    # Old format: has a literal "_model_" segment.
+    if "_model_" in clean:
+        return clean.split("_model_")[0]
+    # Plain architecture name.
+    return clean
 
 
 def build_model(config, raw_model_name, device):
@@ -167,12 +183,24 @@ def save_checkpoint(path, model, epoch, best_iou):
     }, path)
 
 def resolve_ckpt_path(stem, suffix=".pth"):
-    """Resolve checkpoint path, trying subfolder first, then flat layout.
+    """Resolve checkpoint path, trying flat layout first, then subfolder.
 
-    New (preferred): checkpoint/{stem}/{stem}{suffix}
-    Old (fallback):  checkpoint/{stem}{suffix}
+    New (preferred): checkpoint/{stem}{suffix}
+    Legacy:          checkpoint/{stem}/{stem}{suffix}
+    Legacy interrupted: checkpoint/{base}/{stem}{suffix}  (base = stem without ``_interrupted``)
     """
+    # Flat layout (new): checkpoint/{stem}.pth
+    flat = os.path.join("checkpoint", f"{stem}{suffix}")
+    if os.path.exists(flat):
+        return flat
+    # Subfolder layout (legacy): checkpoint/{stem}/{stem}.pth
     sub = os.path.join("checkpoint", stem, f"{stem}{suffix}")
     if os.path.exists(sub):
         return sub
-    return os.path.join("checkpoint", f"{stem}{suffix}")
+    # Legacy interrupted: checkpoint/{base}/{stem}.pth
+    if stem.endswith("_interrupted"):
+        base = stem[:-len("_interrupted")]
+        sub_int = os.path.join("checkpoint", base, f"{stem}{suffix}")
+        if os.path.exists(sub_int):
+            return sub_int
+    raise FileNotFoundError(f"Checkpoint not found for stem: {stem}")

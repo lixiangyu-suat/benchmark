@@ -1,8 +1,7 @@
 ﻿data:
   seed: 41                   # random seed for reproducibility
   base_dir: "./data/busi"    # dataset root
-  train_file_dir: "busi_train.txt"
-  val_file_dir: "busi_val.txt"
+  val_split: 0.3             # proportion of images used for validation
 
 model:
   num_classes: 1             # segmentation classes (binary = 1)
