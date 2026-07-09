@@ -3,7 +3,7 @@
   base_dir: "./data/busi"    # dataset root
   val_split: 0.3             # proportion of images used for validation
 
-model:
+model: #单独输入模型名字。
   num_classes: 1             # segmentation classes (binary = 1)
 
   # SwinUnet-specific options (ignored by other models)
@@ -24,7 +24,7 @@ model:
 train:
   batch_size: 8
   img_size: 256
-  epoch: 3
+  epoch: 300
   base_lr: 0.01
 
 eval:
