@@ -1,184 +1,165 @@
-﻿# Medical Image Segmentation Benchmark
+# Medical Image Segmentation Benchmark
+
+A refactored benchmark for medical image segmentation with **12 model architectures**, three independent pipelines (train / evaluate / distill), and a flat checkpoint system designed for easy comparison.
 
 > Forked from [FengheTan9/Medical-Image-Segmentation-Benchmarks](https://github.com/FengheTan9/Medical-Image-Segmentation-Benchmarks).
->
-> 将原项目单体结构拆分为训练、评估、蒸馏三条独立管线；新增 checkpoint 配对日志系统（.pth + .log 按实验子目录存放）；统一模型加载接口，支持 checkpoint 恢复与中断续训；精简配置体系，删除大量遗留死代码。
+> Refactored from a monolithic script into decoupled pipelines with a unified model loader, checkpoint logging, and configuration system.
 
----
+## At a glance
 
-## 目录结构
+| Layer | Contents |
+|---|---|
+| **Pipelines** | train.py -- training with resume | evaluate.py -- metrics on val set | distill.py -- knowledge distillation |
+| **Models** | 12 architectures: U-Net, U-Net++, U-Net 3+, AttU_Net, U-NeXt, CMU-Net, CMU-NeXt, Mobile U-ViT, Medical Transformer, TransUNet, SwinUNet |
+| **Checkpoints** | Flat checkpoint/ directory, *.pth + *.log paired files, sortable by name |
+| **Config** | Single configs/config.yaml shared by all three pipelines |
+| **Data** | Auto-scan images/ dir, no manual file lists needed |
+
+## Directory structure
 
 ```
 benchmark/
 ├── configs/
-│   ├── config.yaml             # 训练/评估/蒸馏共用配置
-│   ├── modellists.yaml         # 模型注册表（新增模型需同步更新）
-│   ├── config_mirror.txt       # 超参批量扫描镜像文件
-│   └── config_yaml.py          # 批量扫描工具（基于 mirror 展开组合）
+│   ├── config.yaml             # shared config (train / eval / distill)
+│   ├── modellists.yaml         # model registry
+│   ├── config_mirror.txt       # batch-scan template
+│   └── config_yaml.py          # batch hyper-parameter scanner
 ├── scripts/
-│   ├── train.sh                # 训练快捷入口（source-safe）
-│   ├── eval.sh                 # 评估快捷入口
-│   └── distill.sh              # 蒸馏快捷入口
+│   ├── train.sh                # training entry point
+│   ├── eval.sh                 # evaluation entry point
+│   └── distill.sh              # distillation entry point
 ├── src/
-│   ├── train.py                # 训练管线
-│   ├── evaluate.py             # 评估管线
-│   ├── distill.py              # 蒸馏管线
-│   ├── network/                # 模型架构实现
-│   │   ├── U_Net.py            # 原始 U-Net
-│   │   ├── U_Net_re.py         # 修订版 U-Net
-│   │   ├── AttU_Net.py         # Attention U-Net
-│   │   ├── UNetplus.py         # U-Net++（ResNet34 backbone）
-│   │   ├── UNet3plus/          # U-Net 3+
-│   │   ├── UNeXt.py            # U-NeXt
-│   │   ├── CMUNet.py           # CMU-Net
-│   │   ├── CMUNeXt.py          # CMU-NeXt
-│   │   ├── Mobile_U_ViT.py     # Mobile U-ViT
-│   │   ├── medicalT/           # Medical Transformer
-│   │   ├── transUnet/          # TransUNet
-│   │   └── swinUnet/           # SwinUNet
+│   ├── train.py                # training pipeline
+│   ├── evaluate.py             # evaluation pipeline
+│   ├── distill.py              # knowledge distillation pipeline
+│   ├── network/                # model implementations (12 architectures)
 │   └── utils/
-│       ├── model_loader.py     # 模型注册表 + 构建 + checkpoint 路径管理
-│       ├── config.py           # YAML 配置加载
-│       ├── dataset.py          # 数据加载 + 蒸馏数据集包装
-│       ├── metrics.py          # 评估指标（IoU, Dice, SE, PC, F1, ACC）
-│       ├── losses.py           # 损失函数（BCEDiceLoss）
-│       ├── logger.py           # Checkpoint 配对日志系统
-│       └── helpers.py          # 工具函数（种子、计时、参数统计）
-├── checkpoint/                 # 实验子目录（.pth + .log 配对）
+│       ├── model_loader.py     # model registry + build + checkpoint I/O
+│       ├── dataset.py          # data loading + split management
+│       ├── metrics.py          # IoU, Dice, SE, PC, F1, SP, ACC
+│       ├── losses.py           # BCEDiceLoss
+│       ├── logger.py           # checkpoint-paired log system
+│       ├── config.py           # YAML loader
+│       └── helpers.py          # seed, timestamp, AverageMeter
+├── checkpoint/                 # all .pth and .log files (flat)
 ├── data/
-│   ├── busi/                   # 乳腺超声数据集
-│   │   ├── images/             # benign/malignant PNG
-│   │   └── masks/0/            # 对应 mask
-│   ├── busi_train*.txt         # 训练集文件列表
-│   ├── busi_val*.txt           # 验证集文件列表
-│   └── transunet_ACDC.zip      # ACDC 数据集
-├── teacher_probs/              # 蒸馏时临时生成的 soft labels（运行后自动清理）
-├── validation_results/         # 评估可视化输出
-├── split.py                    # 数据集 7:3 随机划分工具
-└── img/ushape.png              # 示意图
+│   └── busi/
+│       ├── images/             # PNG images
+│       └── masks/0/            # corresponding masks
+└── validation_results/         # eval visualizations (with --save_viz)
 ```
 
-## 可用模型
-
-见 `configs/modellists.yaml`，当前内置 **12 个架构**：
-
-| 模型 | 类别 | 说明 |
-|---|---|---|
-| U_Net | cnn | 原始 U-Net |
-| U_Net_re | cnn | 修订版 U-Net |
-| AttU_Net | cnn | Attention U-Net |
-| UNetplus | cnn | U-Net++（ResNet34 backbone） |
-| UNet3plus | cnn | U-Net 3+ |
-| UNext | cnn | U-NeXt |
-| CMUNet | cnn | CMU-Net |
-| CMUNeXt | cnn | CMU-NeXt |
-| Mobile_U_ViT | hybrid | Mobile U-ViT |
-| MedT | transformer | Medical Transformer |
-| TransUnet | transformer | TransUNet（ViT + CNN） |
-| SwinUnet | transformer | SwinUNet |
-
-**新增模型**需同步修改三处：
-1. 把模型代码放到 `src/network/` 下
-2. 在 `src/utils/model_loader.py` 中 import 并注册工厂函数
-3. 在 `configs/modellists.yaml` 中添加一条记录
-
----
-
-## 使用方法
-
-项目在 **WSL2 + conda** 环境下运行。所有 `.sh` 脚本设计为 `source` 执行，自动切到项目根目录。
+## Quick start
 
 ```bash
 conda activate benchmark
-cd ./benchmark
+cd benchmark
 ```
 
-### 训练
+### Train
 
 ```bash
-# 新训练（传入架构名）
+# Fresh training
 source scripts/train.sh U_Net
 
-# 从 checkpoint 恢复（传入 checkpoint stem，自动检测 _model_ 前缀）
-source scripts/train.sh UNetplus_model_2026-07-04_23_17_55
+# Resume from checkpoint (use the exact stem)
+source scripts/train.sh 20260709_1430_U_Net
 ```
 
-每轮训练在 `checkpoint/` 下创建以 checkpoint stem 命名的子目录：
+Checkpoints are stored flat in `checkpoint/`:
 
 ```
-checkpoint/U_Net_model_2026-07-08_16_24_02/
-├── U_Net_model_2026-07-08_16_24_02.pth    # 模型权重
-└── U_Net_model_2026-07-08_16_24_02.log    # 配对日志
+checkpoint/
+├── 20260709_1430_U_Net.pth      # model weights
+├── 20260709_1430_U_Net.log      # paired log
+├── 20260709_1620_MedT.pth
+├── 20260709_1620_MedT.log
+└── ...
 ```
 
-日志按以下顺序组织：
-- `PRETRAIN PARAMS` — 完整 YAML 配置快照
-- `CUSTOM MESSAGE` — config.yaml 中 `log.custom_message` 字段
-- `POSTTRAIN RESULTS` — 最终指标对齐输出
-- `MODEL ARCHITECTURE` — torchinfo 架构摘要
-- `TRAINING LOG` — 逐 epoch 训练输出
+Names use `YYYYMMDD_HHMM_ModelName` format -- alphabetical order equals chronological order. `ls` shows them naturally sorted.
 
-训练中断时按 **Ctrl+C** 自动保存 `_interrupted.pth`，下次 resume 可继续。
+**Ctrl+C** handling: press once, current epoch finishes, checkpoint saved. Press again to force exit.
 
-### 评估
+### Evaluate
 
 ```bash
-source scripts/eval.sh UNetplus_model_2026-07-04_23_17_55
+source scripts/eval.sh 20260709_1430_U_Net
+source scripts/eval.sh 20260709_1430_U_Net --save_viz   # save predictions as PNGs
 ```
 
-输出 torchinfo 架构概览 + 验证集指标（val_loss, val_iou, val_dice, val_SE, val_PC, val_F1, val_ACC）。
+Outputs: val_loss, val_iou, val_dice, val_SE, val_PC, val_F1, val_ACC.
 
-可选 `--save_viz` 将预测 mask 保存到 `validation_results/`。
-
-### 蒸馏
+### Distill (knowledge distillation)
 
 ```bash
-# 教师从 checkpoint 加载，学生从头训练
-source scripts/distill.sh UNetplus_model_2026-07-04_23_17_55 Mobile_U_ViT
+# Teacher from checkpoint, student from scratch
+source scripts/distill.sh 20260709_1430_U_Net Mobile_U_ViT
 
-# 教师 + 学生都从 checkpoint 恢复
-source scripts/distill.sh UNetplus_model_2026-07-04_23_17_55 Mobile_U_ViT_model_2026-07-06_15_41_15
+# Both teacher and student from checkpoints
+source scripts/distill.sh 20260709_1430_U_Net 20260709_1620_Mobile_U_ViT
 ```
 
-流程：
-1. 教师从 checkpoint 加载 → 对训练集生成 soft labels（存 `teacher_probs/`）
-2. 学生按架构名构建（新训练）或从 checkpoint 恢复（含 `_model_` 自动检测）
-3. BCE-Dice（hard target）+ MSE（soft target）联合训练
-4. 保存学生 checkpoint + log，自动清理 `teacher_probs/`
+Flow: teacher generates soft labels, student trains on BCE-Dice (hard) + MSE (soft), temp files auto-cleaned.
 
----
+## Configuration
 
-## 配置说明
+`configs/config.yaml` key fields:
 
-`configs/config.yaml` 主要字段：
-
-| 字段 | 说明 |
+| Field | Description |
 |---|---|
-| `train.epoch` | 训练/蒸馏轮数 |
-| `train.base_lr` | 初始学习率（多项式衰减）|
-| `train.img_size` | 训练图像尺寸 |
-| `train.batch_size` | 批大小 |
-| `eval.img_size` | 评估图像尺寸 |
-| `eval.batch_size` | 评估批大小 |
-| `data.base_dir` | 数据集根目录 |
-| `data.train_file_dir` / `data.val_file_dir` | 训练/验证文件列表 |
-| `model.num_classes` | 分割类别数 |
-| `log.custom_message` | 嵌入 checkpoint log 的自定义标注 |
+| `data.base_dir` | dataset root |
+| `data.seed` | random seed (controls split reproducibility) |
+| `data.val_split` | proportion of images held out for validation (default 0.3) |
+| `train.epoch` | number of epochs per training session |
+| `train.base_lr` | initial learning rate (polynomial decay) |
+| `train.img_size` | training image size |
+| `train.batch_size` | training batch size |
+| `eval.img_size` / `eval.batch_size` | evaluation dimensions |
+| `model.num_classes` | segmentation classes (1 for binary) |
+| `log.custom_message` | annotation embedded in checkpoint log |
 
-模型名不在 yaml 中配置，改为通过命令行 `--model` / `--student` 显式传入。
+The dataset split is **auto-generated**: on first run, `dataset.py` scans `base_dir/images/`, splits by `data.seed` with `data.val_split` ratio, and persists the result as `{dataset}_split.json`. Manual file lists are not needed.
 
----
+Checkpoint logs contain five sections:
+1. **PRETRAIN PARAMS** -- full YAML config snapshot
+2. **CUSTOM MESSAGE** -- from `log.custom_message` in config
+3. **POSTTRAIN RESULTS** -- final metrics (formatted table)
+4. **MODEL ARCHITECTURE** -- torchinfo summary
+5. **TRAINING LOG** -- per-epoch output
 
-## 数据准备
+## Available models
 
-`data/` 下存放数据集。以 busi（乳腺超声）为例：
+| Model | Category | Description |
+|---|---|---|
+| U_Net | CNN | original U-Net |
+| U_Net_re | CNN | revised U-Net |
+| AttU_Net | CNN | Attention U-Net |
+| UNetplus | CNN | U-Net++ (ResNet34 backbone) |
+| UNet3plus | CNN | U-Net 3+ |
+| UNext | CNN | U-NeXt |
+| CMUNet | CNN | CMU-Net |
+| CMUNeXt | CNN | CMU-NeXt |
+| Mobile_U_ViT | hybrid | Mobile U-ViT |
+| MedT | transformer | Medical Transformer (axial attention) |
+| TransUnet | transformer | TransUNet (ViT-CNN hybrid) |
+| SwinUnet | transformer | SwinUNet (shifted-window) |
+
+## Adding a new model
+
+Three files to update:
+
+1. Place the model code in `src/network/`
+2. Register in `src/utils/model_loader.py` -- import + add to `REGISTRY` dict
+3. Register in `configs/modellists.yaml` -- add an entry with description and category
+
+## Data structure
 
 ```
-data/busi/
+data/{dataset}/
 ├── images/
 │   ├── benign (1).png
-│   ├── benign (2).png
-│   ├── malignant (1).png
+│   ├── malignant (10).png
 │   └── ...
 └── masks/
     └── 0/
@@ -186,32 +167,30 @@ data/busi/
         └── ...
 ```
 
-使用 `split.py` 将图片列表划分为训练集和验证集：
+Images and masks must be **PNG** with matching filenames. Masks are single-channel grayscale (0 for background, 255 for foreground). On first training run, the dataset is automatically split into train/val sets based on the configured seed and `val_split` ratio.
 
-```bash
-python split.py --dataset_name busi --dataset_root ./data
-```
-
-脚本读取 `data/busi/images/*.png`，按 7:3 随机分为 `busi_train.txt` 和 `busi_val.txt`（写入 `data/busi/`），然后配置 yaml 中引用对应的文件列表即可。
-
----
-
-## 超参批量扫描
-
-`configs/config_yaml.py` 配合 `configs/config_mirror.txt` 可批量修改 yaml 字段并依次运行脚本：
+## Batch parameter scanning
 
 ```bash
 python configs/config_yaml.py --mirror configs/config_mirror.txt --script scripts/train.sh
 ```
 
-`config_mirror.txt` 中标记 `{值1, 值2}` 或 `{起始-结束}` 的字段会被展开为所有组合，逐个修改 yaml 后执行脚本，全部跑完恢复原始 yaml。
+Fields marked `{value1, value2}` or `{start-end}` in the mirror file are expanded into all combinations, the YAML is updated for each combination, and the script is run. The original YAML is restored after all runs.
 
----
+## Migration from old checkpoints
+
+If you have existing checkpoints from before the naming change, run the migration script once:
+
+```bash
+python scripts/migrate_checkpoints.py
+```
+
+This renames old-format folders (`ModelName_model_YYYY-MM-DD_HH_MM_SS`) to the new flat format (`YYYYMMDD_HHMM_ModelName`).
 
 ## License
 
-本项目基于上游 [FengheTan9/Medical-Image-Segmentation-Benchmarks](https://github.com/FengheTan9/Medical-Image-Segmentation-Benchmarks) 进行重构。具体许可条款请参考上游仓库及项目根目录的 `LICENSE` 文件。
+Based on [FengheTan9/Medical-Image-Segmentation-Benchmarks](https://github.com/FengheTan9/Medical-Image-Segmentation-Benchmarks). See the original repository and `LICENSE` in the project root for details.
 
 ---
 
-*Maintained by **SnowWolf** — example@123.com*
+*Maintained by SnowWolf*
