@@ -95,11 +95,15 @@ def train_student(config, student_model, teacher_prob_dir, logger,
     )
 
     hard_loss_fn = BCEDiceLoss().to(device)
+    print(f"{len(train_loader)} iterations per epoch")
+    print(f"Epochs: {start_epoch} -> {end_epoch}  ({add_epochs} runs)\n")
+
     distill_loss_fn = torch.nn.MSELoss()
     optimizer = optim.Adam(student_model.parameters(), lr=base_lr)
 
     best_loss = float("inf")
     interrupted = False
+    last_completed_epoch = start_epoch - 1
 
     def _on_interrupt(sig, frame):
         nonlocal interrupted
@@ -141,11 +145,13 @@ def train_student(config, student_model, teacher_prob_dir, logger,
             if epoch_loss < best_loss:
                 best_loss = epoch_loss
 
+            last_completed_epoch = epoch
+
     except KeyboardInterrupt:
         interrupted = True
         print("\n\u26a0  Caught KeyboardInterrupt.")
 
-    return best_loss, interrupted, epoch
+    return best_loss, interrupted, last_completed_epoch
 
 
 def main():
@@ -155,14 +161,14 @@ def main():
     seed_everything(config["data"]["seed"])
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    print(f"Loading teacher from: {args.teacher}")
+    print(f"\nLoading teacher from: {args.teacher}")
     teacher = build_model(config, args.teacher, device)
     teacher_sd, _, _ = load_checkpoint_meta(
         resolve_ckpt_path(args.teacher), device)
     teacher.load_state_dict(teacher_sd)
 
     if args.resume:
-        print(f"Resuming student from: {args.student}")
+        print(f"\nResuming student from: {args.student}")
         student_model_name = validate_model(args.student)
         student = build_model(config, args.student, device)
         student_sd, ckpt_epoch, _ = load_checkpoint_meta(
@@ -171,19 +177,23 @@ def main():
         start_epoch = ckpt_epoch + 1
 
         print(f"=> Student resumed from epoch {ckpt_epoch}")
+        ckpt_stem = args.student.replace("_interrupted", "")
+        ckpt_new_stem = f"{timestamp_short()}_{student_model_name}"
+        os.makedirs(os.path.join("checkpoint", ckpt_stem), exist_ok=True)
     else:
-        print(f"Building student from architecture: {args.student}")
+        print(f"\nBuilding student from architecture: {args.student}")
         student_model_name = validate_model(args.student)
         student = build_model(config, args.student, device)
         start_epoch = 1
+        ckpt_stem = f"{timestamp_short()}_{student_model_name}"
+        ckpt_new_stem = ckpt_stem
+        os.makedirs(os.path.join("checkpoint", ckpt_stem), exist_ok=True)
 
 
     teacher_prob_dir = generate_teacher_probs(config, teacher, "teacher_probs")
     print(f"Teacher probabilities saved to {teacher_prob_dir}")
 
-    ckpt_stem = f"{timestamp_short()}_{student_model_name}"
-    os.makedirs("checkpoint", exist_ok=True)
-    log_path = os.path.join("checkpoint", f"{ckpt_stem}.log")
+    log_path = os.path.join("checkpoint", ckpt_stem, f"{ckpt_new_stem}.log")
     logger = CheckpointLogger(log_path)
     logger.log_pretrain(config)
     custom_msg = config.get("log", {}).get("custom_message", "")
@@ -194,17 +204,28 @@ def main():
         start_epoch=start_epoch,
     )
 
-    os.makedirs("checkpoint", exist_ok=True)
     if interrupted:
-        ckpt_path = os.path.join("checkpoint", f"{ckpt_stem}.pth")
         logger.log_training("--- DISTILLATION INTERRUPTED ---")
         logger.log_training(f"Last completed epoch: {last_epoch}")
-        print(f"=> Interrupted, saving to {ckpt_stem}.pth")
-    else:
-        ckpt_path = os.path.join("checkpoint", f"{ckpt_stem}.pth")
-        print(f"=> Distillation finished (best loss: {best_loss:.4f})")
 
-    save_checkpoint(ckpt_path, student, last_epoch, best_loss)
+    # Final checkpoint save
+    final_ckpt = os.path.join("checkpoint", ckpt_stem, f"{ckpt_stem}.pth")
+    save_checkpoint(final_ckpt, student, last_epoch, best_loss)
+
+    if args.resume:
+        # Resume: rename T0.pth -> T1.pth, rename folder T0 -> T1
+        t1_pth = os.path.join("checkpoint", ckpt_stem, f"{ckpt_new_stem}.pth")
+        os.rename(final_ckpt, t1_pth)
+        old_dir = os.path.join("checkpoint", ckpt_stem)
+        new_dir = os.path.join("checkpoint", ckpt_new_stem)
+        os.rename(old_dir, new_dir)
+        log_path = os.path.join("checkpoint", ckpt_new_stem, f"{ckpt_new_stem}.log")
+        logger.log_path = log_path
+        print(f"=> Renamed checkpoint folder: {ckpt_stem} -> {ckpt_new_stem}")
+    elif interrupted:
+        print(f"=> Saved checkpoint: {ckpt_stem}/{ckpt_stem}.pth")
+    else:
+        print(f"=> Distillation finished (best loss: {best_loss:.4f})")
     shutil.rmtree("teacher_probs", ignore_errors=True)
     logger.log_architecture(student,
                             (1, 3, config["train"]["img_size"],

@@ -24,7 +24,7 @@ model:
 train:
   batch_size: 8
   img_size: 256
-  epoch: 5
+  epoch: 3
   base_lr: 0.01
 
 eval:
