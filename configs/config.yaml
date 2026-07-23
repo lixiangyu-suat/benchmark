@@ -1,11 +1,11 @@
 data:
   seed: 41                   # random seed for reproducibility
   base_dir: "./data/busi"    # dataset root
-  train_file: "busi_train.txt"  # train split (relative to base_dir)
-  val_file: "busi_val.txt"      # val split (relative to base_dir)
+  train_file: "busi_train1.txt"  # train split (relative to base_dir)
+  val_file: "busi_val1.txt"      # val split (relative to base_dir)
   val_split: 0.3             # proportion of images used for validation
 
-model: #µ¥¶ÀÊäÈëÄ£ĞÍÃû×Ö¡£
+model: #ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½Ö¡ï¿½
   num_classes: 1             # segmentation classes (binary = 1)
 
   # SwinUnet-specific options (ignored by other models)
@@ -34,4 +34,4 @@ eval:
   img_size: 256
 
 log:
-  custom_message: ""
+  custom_message: "ä¸åŸbatchmarkä½œæµ‹è¯•ï¼ŒéªŒè¯å½“å‰é¡¹ç›®èƒ½å¦æ‰¿æ‹…benchmarkçš„åŠŸèƒ½"

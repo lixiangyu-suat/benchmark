@@ -183,24 +183,19 @@ def save_checkpoint(path, model, epoch, best_iou):
     }, path)
 
 def resolve_ckpt_path(stem, suffix=".pth"):
-    """Resolve checkpoint path, trying flat layout first, then subfolder.
-
-    New (preferred): checkpoint/{stem}{suffix}
-    Legacy:          checkpoint/{stem}/{stem}{suffix}
-    Legacy interrupted: checkpoint/{base}/{stem}{suffix}  (base = stem without ``_interrupted``)
-    """
-    # Flat layout (new): checkpoint/{stem}.pth
-    flat = os.path.join("checkpoint", f"{stem}{suffix}")
-    if os.path.exists(flat):
-        return flat
-    # Subfolder layout (legacy): checkpoint/{stem}/{stem}.pth
-    sub = os.path.join("checkpoint", stem, f"{stem}{suffix}")
-    if os.path.exists(sub):
-        return sub
-    # Legacy interrupted: checkpoint/{base}/{stem}.pth
+    """Resolve checkpoint path, trying variants: _best, _final, bare."""
+    variants = [f"{stem}_best", f"{stem}_final", stem]
+    for v in variants:
+        flat = os.path.join("checkpoint", f"{v}{suffix}")
+        if os.path.exists(flat):
+            return flat
+        sub = os.path.join("checkpoint", stem, f"{v}{suffix}")
+        if os.path.exists(sub):
+            return sub
     if stem.endswith("_interrupted"):
         base = stem[:-len("_interrupted")]
-        sub_int = os.path.join("checkpoint", base, f"{stem}{suffix}")
-        if os.path.exists(sub_int):
-            return sub_int
+        for v in [f"{stem}_best", f"{stem}_final", stem]:
+            sub_int = os.path.join("checkpoint", base, f"{v}{suffix}")
+            if os.path.exists(sub_int):
+                return sub_int
     raise FileNotFoundError(f"Checkpoint not found for stem: {stem}")

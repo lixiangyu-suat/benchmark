@@ -205,7 +205,7 @@ def main():
 
             if meters["val_iou"].avg > best_iou:
                 best_iou = meters["val_iou"].avg
-                ckpt_best_path = os.path.join("checkpoint", ckpt_stem, f"{ckpt_stem}.pth")
+                ckpt_best_path = os.path.join("checkpoint", ckpt_stem, f"{ckpt_stem}_best.pth")
                 save_checkpoint(
                     ckpt_best_path, model, epoch, best_iou,
                 )
@@ -221,12 +221,12 @@ def main():
         logger.log_training(f"Last completed epoch: {last_completed_epoch}")
 
     # Final checkpoint save (ensures .pth exists regardless of best-model improvement)
-    final_ckpt = os.path.join("checkpoint", ckpt_stem, f"{ckpt_stem}.pth")
+    final_ckpt = os.path.join("checkpoint", ckpt_stem, f"{ckpt_stem}_final.pth")
     save_checkpoint(final_ckpt, model, last_completed_epoch, best_iou)
 
     if args.ckpt is not None:
         # Resume: rename T0.pth -> T1.pth, rename folder T0 -> T1
-        t1_pth = os.path.join("checkpoint", ckpt_stem, f"{ckpt_new_stem}.pth")
+        t1_pth = os.path.join("checkpoint", ckpt_stem, f"{ckpt_new_stem}_final.pth")
         os.rename(final_ckpt, t1_pth)
         old_dir = os.path.join("checkpoint", ckpt_stem)
         new_dir = os.path.join("checkpoint", ckpt_new_stem)
@@ -235,7 +235,7 @@ def main():
         logger.log_path = log_path
         print(f"=> Renamed checkpoint folder: {ckpt_stem} -> {ckpt_new_stem}")
     elif interrupted:
-        print(f"=> Saved checkpoint: {ckpt_stem}/{ckpt_stem}.pth")
+        print(f"=> Saved checkpoint: {ckpt_stem}/{ckpt_stem}_final.pth (best: {ckpt_stem}/{ckpt_stem}_best.pth)")
     else:
         print(f"=> Training finished (best val_iou: {best_iou:.4f})")
 
