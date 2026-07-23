@@ -1,9 +1,11 @@
-ï»¿data:
+data:
   seed: 41                   # random seed for reproducibility
   base_dir: "./data/busi"    # dataset root
+  train_file: "busi_train.txt"  # train split (relative to base_dir)
+  val_file: "busi_val.txt"      # val split (relative to base_dir)
   val_split: 0.3             # proportion of images used for validation
 
-model: #å•ç‹¬è¾“å…¥æ¨¡å‹åå­—ã€‚
+model: #µ¥¶ÀÊäÈëÄ£ĞÍÃû×Ö¡£
   num_classes: 1             # segmentation classes (binary = 1)
 
   # SwinUnet-specific options (ignored by other models)
