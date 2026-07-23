@@ -37,6 +37,37 @@ def parse_args():
                              "(e.g. UNet_model_2026-07-04_22_09_42)")
     return parser.parse_args()
 
+def config_dataset(train_loader):
+    # 假设已经获取了 loader
+    # train_loader, val_loader = get_dataloaders(config)
+
+    print("========== 输出一下 Transform 阶段归一化的结果 ==========")
+
+    # 1. 从 dataloader 中抽取第一个 batch 的数据（这里返回的是字典）
+    batch_data = next(iter(train_loader))
+
+    # 2. 从字典中通过 key 提取出图像 Tensor
+    images = batch_data["image"]
+    labels = batch_data["label"]
+
+    # 3. 打印基础信息，确认接口正确
+    print(f"提取到的 image 形状: {images.shape}")
+    print(f"提取到的 label 形状: {labels.shape}")
+    print(f"当前 batch 的 case_name: {batch_data['name']}")
+
+    print("-" * 40)
+
+    # 4. 打印统计信息，查看归一化结果
+    print(f"全局最大值 (Max): {images.max().item():.4f}")
+    print(f"全局最小值 (Min): {images.min().item():.4f}")
+    print(f"全局均值 (Mean): {images.mean().item():.4f}")
+    print(f"全局标准差 (Std): {images.std().item():.4f}")
+
+    # 5. 打印局部具体数值验证
+    print("\n[示例] 第一张图，第二通道，左上角 10x10 像素的实际数值:")
+    print(images[0, 1, :10, :10])
+
+    print("=====================================================")
 
 def main():
     args = parse_args()
@@ -70,6 +101,7 @@ def main():
 
 
     train_loader, val_loader = get_dataloaders(config)
+    config_dataset(train_loader)
 
     base_lr = config["train"]["base_lr"]
     add_epochs = config["train"]["epoch"]
