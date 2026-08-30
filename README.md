@@ -1,204 +1,253 @@
 ﻿# Medical Image Segmentation Benchmark
 
-一个重构的医学图像分割基准，包含 **12 种模型架构**、三条独立流水线（train / evaluate / distill），以及便于对比的 checkpoint 子文件夹系统。
+一个高度解耦、可扩展的医学图像分割基准测试平台。集成 **12 种主流模型架构**，提供训练、评估、知识蒸馏三条独立流水线，并配备严格按时间序追踪的检查点与日志管理系统。
 
-> Forked from [FengheTan9/Medical-Image-Segmentation-Benchmarks](https://github.com/FengheTan9/Medical-Image-Segmentation-Benchmarks).
-> 从单体脚本重构为解耦的流水线，统一了模型加载、checkpoint 日志和配置系统。
-
-## 一瞥
-
-| 层级 | 内容 |
-|---|---|
-| **流水线** | train.py — 训练（支持续传） | evaluate.py — 验证集指标 | distill.py — 知识蒸馏 |
-| **模型** | 12 种：U-Net, U-Net++, U-Net 3+, AttU_Net, U-NeXt, CMU-Net, CMU-NeXt, Mobile U-ViT, Medical Transformer, TransUNet, SwinUNet |
-| **检查点** | checkpoint/{时间戳}_{模型名}/ 子文件夹，内含同名 .pth 和 .log |
-| **配置** | 单文件 configs/config.yaml，三条流水线共享 |
-| **数据** | 自动扫描 images/ 目录，无需手动维护文件列表 |
-
-## 目录结构
-
-`
-benchmark/
-├── configs/
-│   ├── config.yaml             # 共享配置（train / eval / distill）
-│   ├── modellists.yaml         # 模型注册表
-│   ├── config_mirror.txt       # 批量扫描模板
-│   └── config_yaml.py          # 批量超参扫描
-├── scripts/
-│   ├── train.sh                # 训练入口
-│   ├── eval.sh                 # 评估入口
-│   └── distill.sh              # 蒸馏入口
-├── src/
-│   ├── train.py                # 训练流水线
-│   ├── evaluate.py             # 评估流水线
-│   ├── distill.py              # 知识蒸馏流水线
-│   ├── network/                # 模型实现（12 种架构）
-│   └── utils/
-│       ├── model_loader.py     # 模型注册 + 构建 + 检查点读写
-│       ├── dataset.py          # 数据加载 + 切分管理
-│       ├── metrics.py          # IoU, Dice, SE, PC, F1, SP, ACC
-│       ├── losses.py           # BCEDiceLoss
-│       ├── logger.py           # 与 .pth 配对的日志系统
-│       ├── config.py           # YAML 加载器
-│       └── helpers.py          # seed、时间戳、AverageMeter
-├── checkpoint/                 # 所有 .pth 和 .log 文件（按模型分文件夹存放）
-├── data/
-│   └── busi/
-│       ├── images/             # PNG 图像
-│       └── masks/0/            # 对应的掩码
-└── validation_results/         # 评估可视化输出（配合 --save_viz）
-`
-
-## 快速开始
-
-`ash
-conda activate benchmark
-cd benchmark
-`
-
-### 训练
-
-`ash
-# 新训练
-source scripts/train.sh U_Net
-
-# 从 checkpoint 续传（直接用文件夹名）
-source scripts/train.sh 20260709_1430_U_Net
-`
-
-**训练机制**：
-
-| 场景 | 流程 |
-|---|---|
-| **新训练** | T0 = 20260709_1430_U_Net → 建文件夹 checkpoint/T0/ → 训练过程中 best model 覆盖写入 T0.pth，日志写入 T0.log |
-| **续传** | 从 checkpoint/T0/T0.pth 加载 → 训练中覆盖 T0.pth，日志**新写入** T1.log（T0.log 保留历史） → 结束时：保存 T0.pth → **重命名** T0.pth 为 T1.pth → **重命名** 文件夹 T0/ 为 T1/ → 日志路径自动更新 |
-
-续传后的文件夹结构：
-
-`
-checkpoint/
-└── 20260709_1600_Mobile_U_ViT/    # T1（续传后的新名称）
-    ├── 20260709_1600_Mobile_U_ViT.pth   # 最终权重
-    ├── 20260709_1536_Mobile_U_ViT.log   # 第一次训练的日志（保留）
-    └── 20260709_1600_Mobile_U_ViT.log   # 续传训练的日志
-`
-
-Checkpoint 名称使用 YYYYMMDD_HHMM_ModelName 格式 — 按字母顺序即按时间顺序。
-
-**Ctrl+C 处理**：按一次，当前 epoch 完成后保存 checkpoint；再按一次强制退出。
-
-### 评估
-
-`ash
-source scripts/eval.sh 20260709_1430_U_Net
-source scripts/eval.sh 20260709_1430_U_Net --save_viz   # 保存预测结果为 PNG
-`
-
-输出指标：val_loss, val_iou, val_dice, val_SE, val_PC, val_F1, val_ACC
-
-### 蒸馏（Knowledge Distillation）
-
-`ash
-# 老师来自 checkpoint，学生从头训练
-source scripts/distill.sh 20260709_1430_U_Net Mobile_U_ViT
-
-# 老师和学生都来自 checkpoint (带 --resume)
-source scripts/distill.sh 20260709_1430_U_Net 20260709_1620_Mobile_U_ViT --resume
-`
-
-流程：老师生成 soft labels → 学生用 BCE-Dice（硬标签）+ MSE（软标签）训练 → 临时文件自动清理。
-
-蒸馏的学生模型保存逻辑与训练**完全一致**：新训练建子文件夹、续传重命名文件夹；老师模型只加载生成概率，不参与保存。
-
-## 配置
-
-configs/config.yaml 关键字段：
-
-| 字段 | 说明 |
-|---|---|
-| data.base_dir | 数据集根目录 |
-| data.seed | 随机种子（控制切分可复现性） |
-| data.val_split | 验证集比例（默认 0.3） |
-| train.epoch | 每轮训练的 epoch 数量（续传时追加同样数量的 epoch） |
-| train.base_lr | 初始学习率（多项式衰减） |
-| train.img_size | 训练图像尺寸 |
-| train.batch_size | 训练 batch 大小 |
-| eval.img_size / eval.batch_size | 评估使用的尺寸和 batch |
-| model.num_classes | 分割类别数（二分类为 1） |
-| log.custom_message | 嵌入 checkpoint 日志的备注 |
-
-数据集切分是**自动生成**的：首次运行时，dataset.py 扫描 base_dir/images/，根据 data.seed 和 data.val_split 比例划分，结果持久化为 {dataset}_split.json，不需要手动维护文件列表。
-
-Checkpoint 日志包含五个部分：
-1. **PRETRAIN PARAMS** - 完整的 YAML 配置快照
-2. **CUSTOM MESSAGE** - 来自 log.custom_message
-3. **POSTTRAIN RESULTS** - 最终指标（格式化表格）
-4. **MODEL ARCHITECTURE** - torchinfo 模型摘要
-5. **TRAINING LOG** - 逐 epoch 输出
-
-## 可用模型
-
-| 模型 | 类别 | 说明 |
-|---|---|---|
-| U_Net | CNN | 原始 U-Net |
-| U_Net_re | CNN | 修订版 U-Net |
-| AttU_Net | CNN | Attention U-Net |
-| UNetplus | CNN | U-Net++（ResNet34 骨干网络） |
-| UNet3plus | CNN | U-Net 3+ |
-| UNext | CNN | U-NeXt |
-| CMUNet | CNN | CMU-Net |
-| CMUNeXt | CNN | CMU-NeXt |
-| Mobile_U_ViT | hybrid | Mobile U-ViT |
-| MedT | transformer | Medical Transformer（轴向注意力） |
-| TransUnet | transformer | TransUNet（ViT-CNN 混合） |
-| SwinUnet | transformer | SwinUNet（滑动窗口） |
-
-## 添加新模型
-
-需要更新三个文件：
-
-1. 将模型代码放入 src/network/
-2. 在 src/utils/model_loader.py 中注册 - import + 添加到 REGISTRY 字典
-3. 在 configs/modellists.yaml 中注册 - 添加描述和分类
-
-## 数据格式
-
-`
-data/{dataset}/
-├── images/
-│   ├── benign (1).png
-│   ├── malignant (10).png
-│   └── ...
-└── masks/
-    └── 0/
-        ├── benign (1).png
-        └── ...
-`
-
-图片和掩码必须为 **PNG** 格式，文件名一一对应。掩码为单通道灰度图（0 为背景，255 为前景）。首次训练时自动按 seed 和 val_split 比例划分训练/验证集。
-
-## 批量超参扫描
-
-`ash
-python configs/config_yaml.py --mirror configs/config_mirror.txt --script scripts/train.sh
-`
-
-在 mirror 文件中标记为 {value1, value2} 或 {start-end} 的字段会被展开为所有组合，逐次更新 YAML 后执行脚本。所有运行结束后恢复原始 YAML。
-
-## 旧 checkpoint 迁移
-
-如果已有旧格式（命名变更前）的 checkpoint，运行一次迁移脚本：
-
-`ash
-python scripts/migrate_checkpoints.py
-`
-
-会将旧格式文件夹（ModelName_model_YYYY-MM-DD_HH_MM_SS）重命名为新的格式（YYYYMMDD_HHMM_ModelName）。
-
-## 许可证
-
-基于 [FengheTan9/Medical-Image-Segmentation-Benchmarks](https://github.com/FengheTan9/Medical-Image-Segmentation-Benchmarks)。详情见原始仓库和项目根目录的 LICENSE 文件。
+> **Reference**: Forked from [FengheTan9/Medical-Image-Segmentation-Benchmarks](https://github.com/FengheTan9/Medical-Image-Segmentation-Benchmarks)
+> **Refactor Focus**: 单体脚本解耦为模块化 Pipeline、统一模型动态注册加载、统一 Checkpoint 目录生命周期与全局 YAML 配置。
 
 ---
 
-*Maintained by SnowWolf*
+## 核心特性
+
+| 模块 | 说明 | 核心组件 / 文件 |
+| --- | --- | --- |
+| **流水线** | 支持断点续训、标准指标评测、软硬标签知识蒸馏 | `train.py` / `evaluate.py` / `distill.py` |
+| **模型库** | 涵盖 CNN、混合架构及 Transformer 类 12 种分割模型 | `src/network/` |
+| **检查点** | 按 `checkpoint/{时间戳}_{模型名}/` 统一隔离权重与日志 | `src/utils/logger.py` |
+| **配置中心** | 单一入口统一管理所有流水线参数与超参数 | `configs/config.yaml` |
+| **数据管理** | 目录扫描 + 自动化划分持久化，无需手动维护列表 | `src/utils/dataset.py` |
+
+---
+
+## 目录结构
+
+```text
+benchmark/
+├── configs/
+│   ├── config.yaml             # 共享配置（训练 / 评估 / 蒸馏）
+│   ├── modellists.yaml         # 模型注册元数据
+│   ├── config_mirror.txt       # 批量扫描模板
+│   └── config_yaml.py          # 批量超参扫描生成器
+├── scripts/
+│   ├── train.sh                # 训练执行脚本
+│   ├── eval.sh                 # 评估执行脚本
+│   ├── distill.sh              # 蒸馏执行脚本
+│   └── migrate_checkpoints.py  # 旧版检查点迁移工具
+├── src/
+│   ├── train.py                # 训练流水线入口
+│   ├── evaluate.py             # 评估流水线入口
+│   ├── distill.py              # 蒸馏流水线入口
+│   ├── network/                # 12 种模型架构定义
+│   └── utils/
+│       ├── model_loader.py     # 模型注册、动态构建与权重加载
+│       ├── dataset.py          # 数据集读取与划分持久化
+│       ├── metrics.py          # 评估指标库（IoU, Dice, SE, PC, F1, ACC 等）
+│       ├── losses.py           # 损失函数库（BCEDiceLoss 等）
+│       ├── logger.py           # Checkpoint 绑定的日志记录器
+│       ├── config.py           # YAML 配置文件解析器
+│       └── helpers.py          # 随机种子、时间戳与 AverageMeter 等工具
+├── checkpoint/                 # 模型权重与日志持久化目录（按时间戳隔离）
+├── data/
+│   └── busi/
+│       ├── images/             # 原始图像（PNG）
+│       └── masks/0/            # 分割掩码（单通道灰度图）
+└── validation_results/         # 评估预测可视化结果保存目录
+
+```
+
+---
+
+## 快速开始
+
+### 环境激活
+
+```bash
+conda activate benchmark
+cd benchmark
+
+```
+
+### 1. 模型训练 (Train)
+
+```bash
+# 启动全新训练
+source scripts/train.sh U_Net
+
+# 从指定检查点断点续传（直接传入时间戳文件夹名）
+source scripts/train.sh 20260709_1430_U_Net
+
+```
+
+**训练与检查点流转机制**：
+
+| 运行场景 | 目录与文件流转逻辑 |
+| --- | --- |
+| **全新训练** | 1. 生成初始标识 $T_0$（如 `20260709_1430_U_Net`）并建立子目录 `checkpoint/T0/`<br>
+
+<br>2. 训练中最佳权重覆盖写入 `T0.pth`，过程输出记录至 `T0.log` |
+| **断点续训** | 1. 读取 `checkpoint/T0/T0.pth` 作为基础权重<br>
+
+<br>2. 训练过程中覆盖 `T0.pth`，历史日志保留，新日志写入 `$T_1$.log`<br>
+
+<br>3. 训练完成：将 `T0.pth` 重命名为 `$T_1$.pth`，并将目录 `T0/` 原子重命名为 `$T_1$/` |
+
+续传后的目录结构变化示例：
+
+```text
+checkpoint/
+└── 20260709_1600_Mobile_U_ViT/          # 最终目录以续传完成时间戳 (T1) 命名
+    ├── 20260709_1600_Mobile_U_ViT.pth   # 续传后的最终权重
+    ├── 20260709_1536_Mobile_U_ViT.log   # 初始训练阶段历史日志 (T0)
+    └── 20260709_1600_Mobile_U_ViT.log   # 续传阶段日志 (T1)
+
+```
+
+> **中断保护**：
+> * 单次按下 `Ctrl + C`：等待当前 Epoch 完成后优雅保存 Checkpoint 并退出。
+> * 连续按下 `Ctrl + C`：直接强制中断退出。
+> 
+> 
+
+---
+
+### 2. 模型评估 (Evaluate)
+
+```bash
+# 标准评估
+source scripts/eval.sh 20260709_1430_U_Net
+
+# 评估并保存预测掩码可视化图像
+source scripts/eval.sh 20260709_1430_U_Net --save_viz
+
+```
+
+* **评估指标输出**：`val_loss`, `val_iou`, `val_dice`, `val_SE`, `val_PC`, `val_F1`, `val_ACC`。
+
+---
+
+### 3. 知识蒸馏 (Distill)
+
+```bash
+# Teacher 来自检查点，Student 从头初始化训练
+source scripts/distill.sh 20260709_1430_U_Net Mobile_U_ViT
+
+# Teacher 与 Student 均来自检查点（启用 --resume 续传）
+source scripts/distill.sh 20260709_1430_U_Net 20260709_1620_Mobile_U_ViT --resume
+
+```
+
+* **蒸馏逻辑**：Teacher 模型前向推理生成 Soft Labels；Student 模型结合真实标签（BCE-Dice Loss）与软标签（MSE Loss）进行多任务优化，临时生成的中间概率文件在训练完成后自动清理。
+
+---
+
+## 配置文件说明
+
+全局配置集中在 `configs/config.yaml`：
+
+| 配置键 | 默认/示例 | 说明 |
+| --- | --- | --- |
+| `data.base_dir` | `data/busi` | 数据集根目录路径 |
+| `data.seed` | `42` | 数据集切分随机种子（保证切分可复现） |
+| `data.val_split` | `0.3` | 验证集所占比例 |
+| `train.epoch` | `100` | 训练 Epoch 轮数（续传时追加同等轮数） |
+| `train.base_lr` | `1e-3` | 初始学习率（搭配多项式衰减策略） |
+| `train.img_size` | `256` | 训练阶段输入分辨率 |
+| `train.batch_size` | `8` | 训练批大小 |
+| `eval.img_size` | `256` | 评估阶段输入分辨率 |
+| `eval.batch_size` | `1` | 评估批大小 |
+| `model.num_classes` | `1` | 分割通道数（二分类设为 1） |
+| `log.custom_message` | `""` | 嵌入 Checkpoint 头部元信息的自定义备注 |
+
+### 数据切分与持久化
+
+数据集无需维护繁琐的 `train.txt` / `val.txt`。首次启动时，`dataset.py` 自动扫描 `images/`，按 `seed` 与 `val_split` 划分并生成 `{dataset}_split.json`。后续所有流水线均直接复用该 JSON，确保基准对比的一致性。
+
+### 日志结构
+
+生成的 `.log` 文件统一包含五个结构化区块：
+
+1. **PRETRAIN PARAMS**：当前训练所使用的完整 YAML 快照
+2. **CUSTOM MESSAGE**：用户注入的实验备注
+3. **MODEL ARCHITECTURE**：通过 `torchinfo` 导出的模型参数量与层结构摘要
+4. **TRAINING LOG**：逐 Epoch 训练损失与指标变化
+5. **POSTTRAIN RESULTS**：训练结束后的最佳指标概览表
+
+---
+
+## 支持的模型架构
+
+| 模型标识 (Model Name) | 架构分类 | 特点与说明 |
+| --- | --- | --- |
+| `U_Net` | CNN | 经典对称医学分割网络 |
+| `U_Net_re` | CNN | 改进版经典 U-Net |
+| `AttU_Net` | CNN | 融合注意力门控机制的 U-Net |
+| `UNetplus` | CNN | U-Net++（ResNet-34 骨干网络与密集跳跃连接） |
+| `UNet3plus` | CNN | U-Net 3+（全尺度跳跃连接与深度监督） |
+| `UNext` | CNN | 基于 MLP 与轻量卷积的高效分割架构 |
+| `CMUNet` | CNN | 结合上下文多尺度提取的医学分割模型 |
+| `CMUNeXt` | CNN | 融合现代 ConvNeXt 块的高效结构 |
+| `Mobile_U_ViT` | Hybrid | 结合轻量 CNN 与 ViT 的低延迟混合网络 |
+| `MedT` | Transformer | Medical Transformer（基于轴向注意力机制） |
+| `TransUnet` | Transformer | 结合 CNN 局部特征与 ViT 全局自注意力的混合架构 |
+| `SwinUnet` | Transformer | 基于滑动窗口分层自注意力（Swin Transformer）的纯 Transformer 架构 |
+
+---
+
+## 扩展与高级功能
+
+### 扩展新模型
+
+新增自定义模型需完成以下三步：
+
+1. **放置代码**：将模型实现源码添加至 `src/network/your_model.py`。
+2. **注册构造器**：在 `src/utils/model_loader.py` 中引入该类并加入 `REGISTRY` 字典。
+3. **注册元数据**：在 `configs/modellists.yaml` 中配置模型类别、描述及默认参数。
+
+### 数据集目录规范
+
+存入 `data/{dataset}/` 的数据需遵循以下结构：
+
+```text
+data/{dataset}/
+├── images/
+│   ├── case_001.png
+│   ├── case_002.png
+│   └── ...
+└── masks/
+    └── 0/
+        ├── case_001.png
+        ├── case_002.png
+        └── ...
+
+```
+
+* 图像与掩码必须为 **PNG** 格式且文件名严格一致。
+* 掩码需为单通道灰度图（$0$ 代表背景，$255$ 代表分割前景）。
+
+### 批量超参数网格搜索
+
+使用内置扫描工具批量生成配置并依次运行：
+
+```bash
+python configs/config_yaml.py \
+    --mirror configs/config_mirror.txt \
+    --script scripts/train.sh
+
+```
+
+* 在 `config_mirror.txt` 中使用 `{val1, val2}` 或 `{start-end}` 标记待扫描参数，脚本将全排列组合后自动修改 YAML、执行训练并在结束后还原配置文件。
+
+### 旧版 Checkpoint 格式迁移
+
+将旧版 `ModelName_model_YYYY-MM-DD_HH_MM_SS` 格式目录平滑迁移为标准格式：
+
+```bash
+python scripts/migrate_checkpoints.py
+
+```
+
+---
+
+## 开源协议
+
+本项目基于 [FengheTan9/Medical-Image-Segmentation-Benchmarks](https://github.com/FengheTan9/Medical-Image-Segmentation-Benchmarks) 构建，遵循项目根目录下的 `LICENSE` 声明与相关开源许可。
