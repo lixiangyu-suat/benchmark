@@ -13,6 +13,12 @@ models:
   UNetplus:
     description: "U-Net++ (ResNet34 backbone)"
     category: "cnn"
+  UNetplus_L3:
+    description: "3 Layer U-Net++ (ResNet34 backbone)"
+    category: "cnn"
+  UNetplus_L5:
+    description: "5 Layer U-Net++ (ResNet34 backbone)"
+    category: "cnn"
   UNet3plus:
     description: "U-Net 3+"
     category: "cnn"

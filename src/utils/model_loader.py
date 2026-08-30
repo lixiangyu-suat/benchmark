@@ -80,6 +80,14 @@ def build_model(config, raw_model_name, device):
         from src.network.UNetplus import ResNet34UnetPlus
         return ResNet34UnetPlus(num_class=num_classes)
 
+    def _unetplus_l3():
+        from src.network.UNetplus_L3 import ResNet34UnetPlus
+        return ResNet34UnetPlus(num_class=num_classes)
+    
+    def _unetplus_l5():
+        from src.network.UNetplus_L5 import ResNet34UnetPlus
+        return ResNet34UnetPlus(num_class=num_classes)
+    
     def _unet3plus():
         from src.network.UNet3plus.UNet3plus import UNet3plus
         return UNet3plus(n_classes=num_classes)
@@ -118,10 +126,13 @@ def build_model(config, raw_model_name, device):
         swin_cfg = get_config(Namespace(**config["model"]["SwinUnet"]))
         return SwinUnet(swin_cfg, img_size=224, num_classes=num_classes)
 
+    
     REGISTRY = {
         "U_Net": _unet,
         "U_Net_re": _unet_re,
         "UNetplus": _unetplus,
+        "UNetplus_L3": _unetplus_l3,
+        "UNetplus_L5": _unetplus_l5,
         "UNet3plus": _unet3plus,
         "UNext": _unext,
         "AttU_Net": _attu_net,
