@@ -3,8 +3,9 @@ import os
 import signal
 import sys
 import shutil
+import time
 
-_PROJ_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_PROJ_ROOT = os.path.dirname(os.path.abspath(__file__))
 if _PROJ_ROOT not in sys.path:
     sys.path.insert(0, _PROJ_ROOT)
 
@@ -12,11 +13,11 @@ import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
-from src.utils.config import load_config
+from src.utils.config import add_common_args, add_train_args, build_config
 from src.utils.dataset import (DistillationDataset, MedicalDataset,
                                 load_split_ids,
                                 train_transform, val_transform)
-from src.utils.helpers import seed_everything, timestamp, timestamp_short
+from src.utils.helpers import seed_everything, timestamp_short, format_duration
 from src.utils.losses import BCEDiceLoss
 from src.utils.logger import CheckpointLogger
 from src.utils.model_loader import (
@@ -29,15 +30,18 @@ from src.utils.model_loader import (
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Knowledge distillation")
+    parser = argparse.ArgumentParser(
+        description="知识蒸馏（Teacher 软标签 + Student 多任务优化）",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
     parser.add_argument("--teacher", type=str, required=True,
-                        help="Teacher checkpoint stem")
+                        help="Teacher 检查点 stem")
     parser.add_argument("--student", type=str, required=True,
-                        help="Student architecture name or checkpoint stem")
-    parser.add_argument("--cfg", type=str, default="configs/config.yaml",
-                        help="Path to YAML config file")
+                        help="Student 架构名（全新训练）或检查点 stem（配合 --resume）")
     parser.add_argument("--resume", action="store_true",
-                        help="Treat --student as a checkpoint stem (load weights)")
+                        help="将 --student 视为检查点 stem，加载权重续训")
+    add_common_args(parser)
+    add_train_args(parser)
     return parser.parse_args()
 
 
@@ -155,8 +159,10 @@ def train_student(config, student_model, teacher_prob_dir, logger,
 
 
 def main():
+    task_start = time.perf_counter()  # 任务总计时起点
     args = parse_args()
-    config = load_config(args.cfg)
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
+    config = build_config(args)
 
     seed_everything(config["data"]["seed"])
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -199,10 +205,12 @@ def main():
     custom_msg = config.get("log", {}).get("custom_message", "")
     logger.log_custom_message(f"{custom_msg}\n(distillation: teacher={args.teacher})")
 
+    distill_start = time.perf_counter()  # 蒸馏训练计时起点
     best_loss, interrupted, last_epoch = train_student(
         config, student, teacher_prob_dir, logger,
         start_epoch=start_epoch,
     )
+    train_elapsed = time.perf_counter() - distill_start
 
     if interrupted:
         logger.log_training("--- DISTILLATION INTERRUPTED ---")
@@ -230,6 +238,14 @@ def main():
     logger.log_architecture(student,
                             (1, 3, config["train"]["img_size"],
                              config["train"]["img_size"]))
+    task_elapsed = time.perf_counter() - task_start
+    timing_lines = [
+        f"Distillation time (train loop): {format_duration(train_elapsed)}",
+        f"Total task time (whole script): {format_duration(task_elapsed)}",
+    ]
+    for tl in timing_lines:
+        print(f"=> {tl}")
+        logger.log_training(tl)
     logger.log_posttrain(best_loss, {"distill_loss": best_loss})
     logger.flush()
     print(f"=> Log saved to {log_path}")

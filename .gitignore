@@ -18,7 +18,8 @@ validation_results/
 testspeed.py
 
 
-# Python cache
+# cache
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
+.workbuddy/

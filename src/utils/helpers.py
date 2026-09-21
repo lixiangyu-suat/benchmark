@@ -24,12 +24,26 @@ def timestamp():
 
 
 def timestamp_short():
-    """Return current time formatted as YYYYMMDD_HHMM (8+4 digits, sortable).
+    """紧凑时间戳，精确到毫秒，用于 checkpoint 命名。
 
-    Designed for checkpoint naming so that alphabetical order equals
-    chronological order.
+    格式: YYYYMMDD_HHMM_SSmmm，例如 ``20260921_1639_10213``
+    （秒=10，毫秒=213）。字母序即时间序；毫秒位用于避免多 GPU
+    独立并发运行时同秒启动产生的 checkpoint 目录名冲突。
     """
-    return datetime.now().strftime("%Y%m%d_%H%M")
+    now = datetime.now()
+    return now.strftime("%Y%m%d_%H%M_") + f"{now.second:02d}{now.microsecond // 1000:03d}"
+
+
+def format_duration(seconds: float) -> str:
+    """把秒数格式化为 ``HHH:MM:SS.mmm``（小时可超过 24，不归零）。
+
+    例如 20 天 -> ``480:00:01.143``。用于在日志中记录训练/评估/任务耗时。
+    """
+    ms = int(round(seconds * 1000))
+    hours, rem = divmod(ms, 3600_000)
+    minutes, rem = divmod(rem, 60_000)
+    secs, millis = divmod(rem, 1000)
+    return f"{hours}:{minutes:02d}:{secs:02d}.{millis:03d}"
 
 
 def count_params(model):

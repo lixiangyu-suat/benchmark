@@ -1,21 +1,32 @@
 from argparse import Namespace
 import os
 
-import yaml
 import torch
 
 
-def _find_modellists():
-    """Locate modellists.yaml relative to this file."""
-    return os.path.join(os.path.dirname(__file__), "../../configs/modellists.yaml")
+# 可用模型架构元数据（原 configs/modellists.yaml，已内联）。
+# 新增模型时，同步更新此字典与下方 build_model 的 REGISTRY。
+MODEL_LIST = {
+    "U_Net":        {"description": "Original U-Net", "category": "cnn"},
+    "U_Net_re":     {"description": "Revised U-Net", "category": "cnn"},
+    "AttU_Net":     {"description": "Attention U-Net", "category": "cnn"},
+    "UNetplus":     {"description": "U-Net++ (ResNet34 backbone)", "category": "cnn"},
+    "UNetplus_L3":  {"description": "3 Layer U-Net++ (ResNet34 backbone)", "category": "cnn"},
+    "UNetplus_L5":  {"description": "5 Layer U-Net++ (ResNet34 backbone)", "category": "cnn"},
+    "UNet3plus":    {"description": "U-Net 3+", "category": "cnn"},
+    "UNext":        {"description": "U-NeXt", "category": "cnn"},
+    "CMUNet":       {"description": "CMU-Net", "category": "cnn"},
+    "CMUNeXt":      {"description": "CMU-NeXt", "category": "cnn"},
+    "Mobile_U_ViT": {"description": "Mobile U-ViT hybrid", "category": "hybrid"},
+    "MedT":         {"description": "Medical Transformer (axial attention)", "category": "transformer"},
+    "TransUnet":    {"description": "TransUNet (ViT + CNN)", "category": "transformer"},
+    "SwinUnet":     {"description": "SwinUNet (shifted-window Transformer)", "category": "transformer"},
+}
 
 
 def load_model_list():
-    """Read configs/modellists.yaml and return the model metadata dict."""
-    path = _find_modellists()
-    with open(path, "r") as f:
-        data = yaml.safe_load(f)
-    return data["models"]
+    """Return the model metadata dict (name -> {description, category})."""
+    return MODEL_LIST
 
 
 def validate_model(raw_name):
@@ -36,19 +47,24 @@ def validate_model(raw_name):
 def _extract_model_name(raw_name):
     """Extract architecture name from a checkpoint or plain model name.
 
-    Supports three formats:
-      - New:   "20260708_1624_U_Net"            (split by ``_``, first 2 segments are 8+4 digits)
-      - Old:   "U_Net_model_2026-07-08_16_24_02"  (contains ``_model_``)
-      - Plain: "U_Net"
+    Supports four formats:
+      - New (毫秒): "20260921_1639_10213_U_Net"  (8位日期_4位时分_5位秒毫秒_架构名)
+      - New (旧):   "20260708_1624_U_Net"        (8位日期_4位时分_架构名)
+      - Old:        "U_Net_model_2026-07-08_16_24_02"  (contains ``_model_``)
+      - Plain:      "U_Net"
     """
     # Strip _interrupted suffix before parsing.
     clean = raw_name.removesuffix("_interrupted")
 
-    # New format: first two segments are 8-digit date + 4-digit time.
-    parts = clean.split("_", 2)
-    if len(parts) == 3 and parts[0].isdigit() and len(parts[0]) == 8 \
-                        and parts[1].isdigit() and len(parts[1]) == 4:
-        return parts[2]
+    parts = clean.split("_")
+    # 开头是 8位日期 + 4位时分 的时间戳前缀
+    if len(parts) > 2 and parts[0].isdigit() and len(parts[0]) == 8 \
+                       and parts[1].isdigit() and len(parts[1]) == 4:
+        i = 2
+        # 毫秒新格式还有第三段：秒(2位)+毫秒(3位) 共 5 位数字
+        if len(parts) > 3 and parts[2].isdigit() and len(parts[2]) == 5:
+            i = 3
+        return "_".join(parts[i:])
     # Old format: has a literal "_model_" segment.
     if "_model_" in clean:
         return clean.split("_model_")[0]

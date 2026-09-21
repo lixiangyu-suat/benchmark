@@ -1,34 +1,54 @@
 from pathlib import Path
+
 import torch
 import torch.nn as nn
 import onnx
+
+from src.utils.model_loader import load_checkpoint_meta
 
 
 def convert_pth_to_onnx(
     model: nn.Module,
     pth_path,
     onnx_path,
-    dummy_input: torch.Tensor,
-    input_names: list[str] = None,
-    output_names: list[str] = None,
+    dummy_input,
+    input_names: list = None,
+    output_names: list = None,
     dynamic_axes: dict = None,
     device: str = "cpu",
 ) -> None:
-    """将 PyTorch 的 .pth 模型权重转换为 .onnx 格式并校验。"""
+    """将训练保存的 .pth 检查点导出为 .onnx 并校验。
+
+    Parameters
+    ----------
+    model : nn.Module
+        已构建好的模型（权重会被 pth_path 覆盖加载）。
+    pth_path : path-like
+        save_checkpoint 保存的检查点（dict 格式或裸 state_dict 均可）。
+    onnx_path : path-like
+        输出 .onnx 文件路径。
+    dummy_input : torch.Tensor 或 tuple
+        示例输入张量，或输入形状元组如 ``(1, 3, 256, 256)``。
+    """
     input_names = input_names or ["input"]
     output_names = output_names or ["output"]
 
-    # 1. 载入权重并切换为评估模式
-    state_dict = torch.load(pth_path, map_location=device, weights_only=False)
-    model.load_state_dict(state_dict)
-    model.to(device)
-    model.eval()
+    # 1. 载入权重（兼容 checkpoint dict 格式与 DataParallel 前缀）并切换为评估模式
+    state_dict, _, _ = load_checkpoint_meta(pth_path, device)
+    target = model.module if isinstance(model, torch.nn.DataParallel) else model
+    target.load_state_dict(state_dict)
+    target.to(device)
+    target.eval()
 
+    # dummy_input 支持直接传形状元组
+    if not isinstance(dummy_input, torch.Tensor):
+        dummy_input = torch.randn(*dummy_input)
     dummy_input = dummy_input.to(device)
 
     # 2. 导出为 ONNX
+    Path(onnx_path).parent.mkdir(parents=True, exist_ok=True)
     torch.onnx.export(
-        model,
+        target,
         dummy_input,
         str(onnx_path),
         export_params=True,
@@ -42,21 +62,4 @@ def convert_pth_to_onnx(
     # 3. 校验导出的 ONNX 文件格式是否完整有效
     onnx_model = onnx.load(str(onnx_path))
     onnx.checker.check_model(onnx_model)
-    print(f"✓ 转换成功: {onnx_path}")
-
-
-if __name__ == "__main__":
-    # 使用示例：
-    # from my_network import MyModel
-    #
-    # model = MyModel()
-    # dummy_input = torch.randn(1, 3, 224, 224)  # 依据你的网络输入形状构造
-    #
-    # convert_pth_to_onnx(
-    #     model=model,
-    #     pth_path="weights/model.pth",
-    #     onnx_path="weights/model.onnx",
-    #     dummy_input=dummy_input,
-    #     dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}} # 若需要动态 batch
-    # )
-    pass
+    print(f"✓ ONNX 导出成功: {onnx_path}")
