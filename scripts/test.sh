@@ -13,7 +13,7 @@ if [ -z "$MODEL_NAME" ]; then
     [ "$_SOURCED" -eq 1 ] && return 1 || exit 1
 fi
 
-python src/evaluate.py \
+CUDA_VISIBLE_DEVICES=0 python src/evaluate.py \
     --model "$MODEL_NAME" \
     --cfg configs/config.yaml \
     "$@"

@@ -23,7 +23,7 @@ fi
 # New format: "20260708_1624_U_Net"
 if [[ "$MODEL" =~ ^[0-9]{8}_[0-9]{4}_ ]]; then
     ARCH="${MODEL#*_*_}"
-    python src/train.py \
+    CUDA_VISIBLE_DEVICES=0 python src/train.py \
         --model "$ARCH" \
         --ckpt "$MODEL" \
         --cfg configs/config.yaml \
@@ -31,13 +31,13 @@ if [[ "$MODEL" =~ ^[0-9]{8}_[0-9]{4}_ ]]; then
 # Old format: "UNetplus_model_2026-07-04_23_17_55"
 elif [[ "$MODEL" == *_model_* ]]; then
     ARCH="${MODEL%%_model_*}"
-    python src/train.py \
+    CUDA_VISIBLE_DEVICES=0 python src/train.py \
         --model "$ARCH" \
         --ckpt "$MODEL" \
         --cfg configs/config.yaml \
         "$@"
 else
-    python src/train.py \
+    CUDA_VISIBLE_DEVICES=0 python src/train.py \
         --model "$MODEL" \
         --cfg configs/config.yaml \
         "$@"

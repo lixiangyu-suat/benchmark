@@ -24,6 +24,7 @@ from src.utils.model_loader import (
     validate_model,
     resolve_ckpt_path,
 )
+from src.utils.convert_to_onnx import convert_pth_to_onnx
 
 
 def parse_args():
@@ -220,9 +221,19 @@ def main():
         logger.log_training("--- TRAINING INTERRUPTED ---")
         logger.log_training(f"Last completed epoch: {last_completed_epoch}")
 
-    # Final checkpoint save (ensures .pth exists regardless of best-model improvement)
+    # Final checkpoint save (.pth)
     final_ckpt = os.path.join("checkpoint", ckpt_stem, f"{ckpt_stem}_final.pth")
     save_checkpoint(final_ckpt, model, last_completed_epoch, best_iou)
+
+    # Final checkpoint save (.onnx )
+    final_onnx = os.path.join("checkpoint", ckpt_stem, f"{ckpt_stem}_final.onnx")
+    convert_pth_to_onnx(
+        model=model,
+        pth_path=final_ckpt,
+        onnx_path=final_onnx,
+        dummy_input=(1, 3, 224, 224),
+        dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}} # 若需要动态 batch
+    )
 
     if args.ckpt is not None:
         # Resume: rename T0.pth -> T1.pth, rename folder T0 -> T1

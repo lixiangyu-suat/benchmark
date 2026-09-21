@@ -23,7 +23,7 @@ fi
 # -- Auto-detect: student checkpoint stem contains "_model_" ---------
 # New format: "20260708_1624_Mobile_U_ViT"
 if [[ "$STUDENT" =~ ^[0-9]{8}_[0-9]{4}_ ]]; then
-    python src/distill.py \
+    CUDA_VISIBLE_DEVICES=0 python src/distill.py \
         --teacher "$TEACHER" \
         --student "$STUDENT" \
         --cfg configs/config.yaml \
@@ -31,14 +31,14 @@ if [[ "$STUDENT" =~ ^[0-9]{8}_[0-9]{4}_ ]]; then
         "$@"
 # Old format: "Mobile_U_ViT_model_2026-07-04_23_17_55"
 elif [[ "$STUDENT" == *_model_* ]]; then
-    python src/distill.py \
+    CUDA_VISIBLE_DEVICES=0 python src/distill.py \
         --teacher "$TEACHER" \
         --student "$STUDENT" \
         --cfg configs/config.yaml \
         --resume \
         "$@"
 else
-    python src/distill.py \
+    CUDA_VISIBLE_DEVICES=0 python src/distill.py \
         --teacher "$TEACHER" \
         --student "$STUDENT" \
         --cfg configs/config.yaml \
