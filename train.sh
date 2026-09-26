@@ -9,7 +9,7 @@ set -e
 cd "$(dirname "$0")"
 
 python train.py \
-    --model UNetplus_L3 \
+    --model Mobile_U_ViT \
     --epoch 2 \
     --base_lr 0.01 \
     --batch_size 8 \
