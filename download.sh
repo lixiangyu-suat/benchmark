@@ -3,8 +3,8 @@
 # 1.备用源
 source -i https://pypi.tuna.tsinghua.edu.cn/simple
 
-# 2. 安装 PyTorch 1.13.0 albumentations 1.2.0
-pip install pytorch==1.13.0 torchvision torchaudio albumentations==1.2.0
+# 2. 安装 PyTorch, albumentations 1.2.0
+pip install pytorch torchvision torchaudio albumentations==1.2.0
 
 # 3. 验证安装结果
 python -c "
