@@ -1,0 +1,402 @@
+&&&& RUNNING TensorRT.trtexec [TensorRT v8502] # /usr/src/tensorrt/bin/trtexec --onnx=model_best_opset16.onnx --saveEngine=test_best_fp32.engine
+[10/03/2026-16:54:48] [I] === Model Options ===
+[10/03/2026-16:54:48] [I] Format: ONNX
+[10/03/2026-16:54:48] [I] Model: model_best_opset16.onnx
+[10/03/2026-16:54:48] [I] Output:
+[10/03/2026-16:54:48] [I] === Build Options ===
+[10/03/2026-16:54:48] [I] Max batch: explicit batch
+[10/03/2026-16:54:48] [I] Memory Pools: workspace: default, dlaSRAM: default, dlaLocalDRAM: default, dlaGlobalDRAM: default
+[10/03/2026-16:54:48] [I] minTiming: 1
+[10/03/2026-16:54:48] [I] avgTiming: 8
+[10/03/2026-16:54:48] [I] Precision: FP32
+[10/03/2026-16:54:48] [I] LayerPrecisions: 
+[10/03/2026-16:54:48] [I] Calibration: 
+[10/03/2026-16:54:48] [I] Refit: Disabled
+[10/03/2026-16:54:48] [I] Sparsity: Disabled
+[10/03/2026-16:54:48] [I] Safe mode: Disabled
+[10/03/2026-16:54:48] [I] DirectIO mode: Disabled
+[10/03/2026-16:54:48] [I] Restricted mode: Disabled
+[10/03/2026-16:54:48] [I] Build only: Disabled
+[10/03/2026-16:54:48] [I] Save engine: test_best_fp32.engine
+[10/03/2026-16:54:48] [I] Load engine: 
+[10/03/2026-16:54:48] [I] Profiling verbosity: 0
+[10/03/2026-16:54:48] [I] Tactic sources: Using default tactic sources
+[10/03/2026-16:54:48] [I] timingCacheMode: local
+[10/03/2026-16:54:48] [I] timingCacheFile: 
+[10/03/2026-16:54:48] [I] Heuristic: Disabled
+[10/03/2026-16:54:48] [I] Preview Features: Use default preview flags.
+[10/03/2026-16:54:48] [I] Input(s)s format: fp32:CHW
+[10/03/2026-16:54:48] [I] Output(s)s format: fp32:CHW
+[10/03/2026-16:54:48] [I] Input build shapes: model
+[10/03/2026-16:54:48] [I] Input calibration shapes: model
+[10/03/2026-16:54:48] [I] === System Options ===
+[10/03/2026-16:54:48] [I] Device: 0
+[10/03/2026-16:54:48] [I] DLACore: 
+[10/03/2026-16:54:48] [I] Plugins:
+[10/03/2026-16:54:48] [I] === Inference Options ===
+[10/03/2026-16:54:48] [I] Batch: Explicit
+[10/03/2026-16:54:48] [I] Input inference shapes: model
+[10/03/2026-16:54:48] [I] Iterations: 10
+[10/03/2026-16:54:48] [I] Duration: 3s (+ 200ms warm up)
+[10/03/2026-16:54:48] [I] Sleep time: 0ms
+[10/03/2026-16:54:48] [I] Idle time: 0ms
+[10/03/2026-16:54:48] [I] Streams: 1
+[10/03/2026-16:54:48] [I] ExposeDMA: Disabled
+[10/03/2026-16:54:48] [I] Data transfers: Enabled
+[10/03/2026-16:54:48] [I] Spin-wait: Disabled
+[10/03/2026-16:54:48] [I] Multithreading: Disabled
+[10/03/2026-16:54:48] [I] CUDA Graph: Disabled
+[10/03/2026-16:54:48] [I] Separate profiling: Disabled
+[10/03/2026-16:54:48] [I] Time Deserialize: Disabled
+[10/03/2026-16:54:48] [I] Time Refit: Disabled
+[10/03/2026-16:54:48] [I] NVTX verbosity: 0
+[10/03/2026-16:54:48] [I] Persistent Cache Ratio: 0
+[10/03/2026-16:54:48] [I] Inputs:
+[10/03/2026-16:54:48] [I] === Reporting Options ===
+[10/03/2026-16:54:48] [I] Verbose: Disabled
+[10/03/2026-16:54:48] [I] Averages: 10 inferences
+[10/03/2026-16:54:48] [I] Percentiles: 90,95,99
+[10/03/2026-16:54:48] [I] Dump refittable layers:Disabled
+[10/03/2026-16:54:48] [I] Dump output: Disabled
+[10/03/2026-16:54:48] [I] Profile: Disabled
+[10/03/2026-16:54:48] [I] Export timing to JSON file: 
+[10/03/2026-16:54:48] [I] Export output to JSON file: 
+[10/03/2026-16:54:48] [I] Export profile to JSON file: 
+[10/03/2026-16:54:48] [I] 
+[10/03/2026-16:54:48] [I] === Device Information ===
+[10/03/2026-16:54:48] [I] Selected Device: Orin
+[10/03/2026-16:54:48] [I] Compute Capability: 8.7
+[10/03/2026-16:54:48] [I] SMs: 8
+[10/03/2026-16:54:48] [I] Compute Clock Rate: 0.918 GHz
+[10/03/2026-16:54:48] [I] Device Global Memory: 15503 MiB
+[10/03/2026-16:54:48] [I] Shared Memory per SM: 164 KiB
+[10/03/2026-16:54:48] [I] Memory Bus Width: 256 bits (ECC disabled)
+[10/03/2026-16:54:48] [I] Memory Clock Rate: 0.918 GHz
+[10/03/2026-16:54:48] [I] 
+[10/03/2026-16:54:48] [I] TensorRT version: 8.5.2
+[10/03/2026-16:54:50] [I] [TRT] [MemUsageChange] Init CUDA: CPU +220, GPU +0, now: CPU 249, GPU 4919 (MiB)
+[10/03/2026-16:55:02] [I] [TRT] [MemUsageChange] Init builder kernel library: CPU +302, GPU +284, now: CPU 574, GPU 5225 (MiB)
+[10/03/2026-16:55:02] [I] Start parsing network model
+[10/03/2026-16:55:02] [I] [TRT] ----------------------------------------------------------------
+[10/03/2026-16:55:02] [I] [TRT] Input filename:   model_best_opset16.onnx
+[10/03/2026-16:55:02] [I] [TRT] ONNX IR version:  0.0.8
+[10/03/2026-16:55:02] [I] [TRT] Opset version:    16
+[10/03/2026-16:55:02] [I] [TRT] Producer name:    pytorch
+[10/03/2026-16:55:02] [I] [TRT] Producer version: 2.5.1
+[10/03/2026-16:55:02] [I] [TRT] Domain:           
+[10/03/2026-16:55:02] [I] [TRT] Model version:    0
+[10/03/2026-16:55:02] [I] [TRT] Doc string:       
+[10/03/2026-16:55:02] [I] [TRT] ----------------------------------------------------------------
+[10/03/2026-16:55:02] [W] [TRT] onnx2trt_utils.cpp:375: Your ONNX model has been generated with INT64 weights, while TensorRT does not natively support INT64. Attempting to cast down to INT32.
+[10/03/2026-16:55:09] [I] Finish parsing network model
+[10/03/2026-16:55:17] [I] [TRT] ---------- Layers Running on DLA ----------
+[10/03/2026-16:55:17] [I] [TRT] ---------- Layers Running on GPU ----------
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /patch_embeddings/stem/stem.0/Conv + /patch_embeddings/stem/stem.2/Relu
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /patch_embeddings/layer1/block/block.0/block.0.0/fn/fn.0/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(/patch_embeddings/layer1/block/block.0/block.0.0/fn/fn.1/Constant_output_0 + (Unnamed Layer* 4) [Shuffle], /patch_embeddings/layer1/block/block.0/block.0.0/fn/fn.1/Div), /patch_embeddings/layer1/block/block.0/block.0.0/fn/fn.1/Erf), /patch_embeddings/layer1/block/block.0/block.0.0/fn/fn.1/Constant_1_output_0 + (Unnamed Layer* 8) [Shuffle] + /patch_embeddings/layer1/block/block.0/block.0.0/fn/fn.1/Add), /patch_embeddings/layer1/block/block.0/block.0.0/fn/fn.1/Mul)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SCALE: /patch_embeddings/layer1/block/block.0/block.0.0/fn/fn.1/Constant_2_output_0 + (Unnamed Layer* 12) [Shuffle] + /patch_embeddings/layer1/block/block.0/block.0.0/fn/fn.1/Mul_1 + /patch_embeddings/layer1/block/block.0/block.0.0/fn/fn.2/BatchNormalization
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] ELEMENTWISE: /patch_embeddings/layer1/block/block.0/block.0.0/Add
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /patch_embeddings/layer1/block/block.0/block.0.1/fn/fn.0/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(/patch_embeddings/layer1/block/block.0/block.0.1/fn/fn.1/Constant_output_0 + (Unnamed Layer* 18) [Shuffle], /patch_embeddings/layer1/block/block.0/block.0.1/fn/fn.1/Div), /patch_embeddings/layer1/block/block.0/block.0.1/fn/fn.1/Erf), /patch_embeddings/layer1/block/block.0/block.0.1/fn/fn.1/Constant_1_output_0 + (Unnamed Layer* 22) [Shuffle] + /patch_embeddings/layer1/block/block.0/block.0.1/fn/fn.1/Add), /patch_embeddings/layer1/block/block.0/block.0.1/fn/fn.1/Mul)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SCALE: /patch_embeddings/layer1/block/block.0/block.0.1/fn/fn.1/Constant_2_output_0 + (Unnamed Layer* 26) [Shuffle] + /patch_embeddings/layer1/block/block.0/block.0.1/fn/fn.1/Mul_1 + /patch_embeddings/layer1/block/block.0/block.0.1/fn/fn.2/BatchNormalization
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /patch_embeddings/layer1/block/block.0/block.0.1/fn/fn.3/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(/patch_embeddings/layer1/block/block.0/block.0.1/fn/fn.4/Constant_output_0 + (Unnamed Layer* 31) [Shuffle], /patch_embeddings/layer1/block/block.0/block.0.1/fn/fn.4/Div), /patch_embeddings/layer1/block/block.0/block.0.1/fn/fn.4/Erf), /patch_embeddings/layer1/block/block.0/block.0.1/fn/fn.4/Constant_1_output_0 + (Unnamed Layer* 35) [Shuffle] + /patch_embeddings/layer1/block/block.0/block.0.1/fn/fn.4/Add), /patch_embeddings/layer1/block/block.0/block.0.1/fn/fn.4/Mul)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SCALE: /patch_embeddings/layer1/block/block.0/block.0.1/fn/fn.4/Constant_2_output_0 + (Unnamed Layer* 39) [Shuffle] + /patch_embeddings/layer1/block/block.0/block.0.1/fn/fn.4/Mul_1 + /patch_embeddings/layer1/block/block.0/block.0.1/fn/fn.5/BatchNormalization
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] ELEMENTWISE: /patch_embeddings/layer1/block/block.0/block.0.1/Add
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /patch_embeddings/layer1/up/up.0/Conv + /patch_embeddings/layer1/up/up.2/Relu
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POOLING: /patch_embeddings/down/MaxPool
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /patch_embeddings/layer2/block/block.0/block.0.0/fn/fn.0/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(/patch_embeddings/layer2/block/block.0/block.0.0/fn/fn.1/Constant_output_0 + (Unnamed Layer* 48) [Shuffle], /patch_embeddings/layer2/block/block.0/block.0.0/fn/fn.1/Div), /patch_embeddings/layer2/block/block.0/block.0.0/fn/fn.1/Erf), /patch_embeddings/layer2/block/block.0/block.0.0/fn/fn.1/Constant_1_output_0 + (Unnamed Layer* 52) [Shuffle] + /patch_embeddings/layer2/block/block.0/block.0.0/fn/fn.1/Add), /patch_embeddings/layer2/block/block.0/block.0.0/fn/fn.1/Mul)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SCALE: /patch_embeddings/layer2/block/block.0/block.0.0/fn/fn.1/Constant_2_output_0 + (Unnamed Layer* 56) [Shuffle] + /patch_embeddings/layer2/block/block.0/block.0.0/fn/fn.1/Mul_1 + /patch_embeddings/layer2/block/block.0/block.0.0/fn/fn.2/BatchNormalization
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] ELEMENTWISE: /patch_embeddings/layer2/block/block.0/block.0.0/Add
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /patch_embeddings/layer2/block/block.0/block.0.1/fn/fn.0/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(/patch_embeddings/layer2/block/block.0/block.0.1/fn/fn.1/Constant_output_0 + (Unnamed Layer* 62) [Shuffle], /patch_embeddings/layer2/block/block.0/block.0.1/fn/fn.1/Div), /patch_embeddings/layer2/block/block.0/block.0.1/fn/fn.1/Erf), /patch_embeddings/layer2/block/block.0/block.0.1/fn/fn.1/Constant_1_output_0 + (Unnamed Layer* 66) [Shuffle] + /patch_embeddings/layer2/block/block.0/block.0.1/fn/fn.1/Add), /patch_embeddings/layer2/block/block.0/block.0.1/fn/fn.1/Mul)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SCALE: /patch_embeddings/layer2/block/block.0/block.0.1/fn/fn.1/Constant_2_output_0 + (Unnamed Layer* 70) [Shuffle] + /patch_embeddings/layer2/block/block.0/block.0.1/fn/fn.1/Mul_1 + /patch_embeddings/layer2/block/block.0/block.0.1/fn/fn.2/BatchNormalization
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /patch_embeddings/layer2/block/block.0/block.0.1/fn/fn.3/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(/patch_embeddings/layer2/block/block.0/block.0.1/fn/fn.4/Constant_output_0 + (Unnamed Layer* 75) [Shuffle], /patch_embeddings/layer2/block/block.0/block.0.1/fn/fn.4/Div), /patch_embeddings/layer2/block/block.0/block.0.1/fn/fn.4/Erf), /patch_embeddings/layer2/block/block.0/block.0.1/fn/fn.4/Constant_1_output_0 + (Unnamed Layer* 79) [Shuffle] + /patch_embeddings/layer2/block/block.0/block.0.1/fn/fn.4/Add), /patch_embeddings/layer2/block/block.0/block.0.1/fn/fn.4/Mul)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SCALE: /patch_embeddings/layer2/block/block.0/block.0.1/fn/fn.4/Constant_2_output_0 + (Unnamed Layer* 83) [Shuffle] + /patch_embeddings/layer2/block/block.0/block.0.1/fn/fn.4/Mul_1 + /patch_embeddings/layer2/block/block.0/block.0.1/fn/fn.5/BatchNormalization
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] ELEMENTWISE: /patch_embeddings/layer2/block/block.0/block.0.1/Add
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /patch_embeddings/layer2/up/up.0/Conv + /patch_embeddings/layer2/up/up.2/Relu
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POOLING: /patch_embeddings/down_1/MaxPool
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /patch_embeddings/layer3/block/block.0/block.0.0/fn/fn.0/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(/patch_embeddings/layer3/block/block.0/block.0.0/fn/fn.1/Constant_output_0 + (Unnamed Layer* 92) [Shuffle], /patch_embeddings/layer3/block/block.0/block.0.0/fn/fn.1/Div), /patch_embeddings/layer3/block/block.0/block.0.0/fn/fn.1/Erf), /patch_embeddings/layer3/block/block.0/block.0.0/fn/fn.1/Constant_1_output_0 + (Unnamed Layer* 96) [Shuffle] + /patch_embeddings/layer3/block/block.0/block.0.0/fn/fn.1/Add), /patch_embeddings/layer3/block/block.0/block.0.0/fn/fn.1/Mul)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SCALE: /patch_embeddings/layer3/block/block.0/block.0.0/fn/fn.1/Constant_2_output_0 + (Unnamed Layer* 100) [Shuffle] + /patch_embeddings/layer3/block/block.0/block.0.0/fn/fn.1/Mul_1 + /patch_embeddings/layer3/block/block.0/block.0.0/fn/fn.2/BatchNormalization
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] ELEMENTWISE: /patch_embeddings/layer3/block/block.0/block.0.0/Add
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /patch_embeddings/layer3/block/block.0/block.0.1/fn/fn.0/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(/patch_embeddings/layer3/block/block.0/block.0.1/fn/fn.1/Constant_output_0 + (Unnamed Layer* 106) [Shuffle], /patch_embeddings/layer3/block/block.0/block.0.1/fn/fn.1/Div), /patch_embeddings/layer3/block/block.0/block.0.1/fn/fn.1/Erf), /patch_embeddings/layer3/block/block.0/block.0.1/fn/fn.1/Constant_1_output_0 + (Unnamed Layer* 110) [Shuffle] + /patch_embeddings/layer3/block/block.0/block.0.1/fn/fn.1/Add), /patch_embeddings/layer3/block/block.0/block.0.1/fn/fn.1/Mul)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SCALE: /patch_embeddings/layer3/block/block.0/block.0.1/fn/fn.1/Constant_2_output_0 + (Unnamed Layer* 114) [Shuffle] + /patch_embeddings/layer3/block/block.0/block.0.1/fn/fn.1/Mul_1 + /patch_embeddings/layer3/block/block.0/block.0.1/fn/fn.2/BatchNormalization
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /patch_embeddings/layer3/block/block.0/block.0.1/fn/fn.3/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(/patch_embeddings/layer3/block/block.0/block.0.1/fn/fn.4/Constant_output_0 + (Unnamed Layer* 119) [Shuffle], /patch_embeddings/layer3/block/block.0/block.0.1/fn/fn.4/Div), /patch_embeddings/layer3/block/block.0/block.0.1/fn/fn.4/Erf), /patch_embeddings/layer3/block/block.0/block.0.1/fn/fn.4/Constant_1_output_0 + (Unnamed Layer* 123) [Shuffle] + /patch_embeddings/layer3/block/block.0/block.0.1/fn/fn.4/Add), /patch_embeddings/layer3/block/block.0/block.0.1/fn/fn.4/Mul)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SCALE: /patch_embeddings/layer3/block/block.0/block.0.1/fn/fn.4/Constant_2_output_0 + (Unnamed Layer* 127) [Shuffle] + /patch_embeddings/layer3/block/block.0/block.0.1/fn/fn.4/Mul_1 + /patch_embeddings/layer3/block/block.0/block.0.1/fn/fn.5/BatchNormalization
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] ELEMENTWISE: /patch_embeddings/layer3/block/block.0/block.0.1/Add
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /patch_embeddings/layer3/block/block.1/block.1.0/fn/fn.0/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(/patch_embeddings/layer3/block/block.1/block.1.0/fn/fn.1/Constant_output_0 + (Unnamed Layer* 133) [Shuffle], /patch_embeddings/layer3/block/block.1/block.1.0/fn/fn.1/Div), /patch_embeddings/layer3/block/block.1/block.1.0/fn/fn.1/Erf), /patch_embeddings/layer3/block/block.1/block.1.0/fn/fn.1/Constant_1_output_0 + (Unnamed Layer* 137) [Shuffle] + /patch_embeddings/layer3/block/block.1/block.1.0/fn/fn.1/Add), /patch_embeddings/layer3/block/block.1/block.1.0/fn/fn.1/Mul)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SCALE: /patch_embeddings/layer3/block/block.1/block.1.0/fn/fn.1/Constant_2_output_0 + (Unnamed Layer* 141) [Shuffle] + /patch_embeddings/layer3/block/block.1/block.1.0/fn/fn.1/Mul_1 + /patch_embeddings/layer3/block/block.1/block.1.0/fn/fn.2/BatchNormalization
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] ELEMENTWISE: /patch_embeddings/layer3/block/block.1/block.1.0/Add
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /patch_embeddings/layer3/block/block.1/block.1.1/fn/fn.0/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(/patch_embeddings/layer3/block/block.1/block.1.1/fn/fn.1/Constant_output_0 + (Unnamed Layer* 147) [Shuffle], /patch_embeddings/layer3/block/block.1/block.1.1/fn/fn.1/Div), /patch_embeddings/layer3/block/block.1/block.1.1/fn/fn.1/Erf), /patch_embeddings/layer3/block/block.1/block.1.1/fn/fn.1/Constant_1_output_0 + (Unnamed Layer* 151) [Shuffle] + /patch_embeddings/layer3/block/block.1/block.1.1/fn/fn.1/Add), /patch_embeddings/layer3/block/block.1/block.1.1/fn/fn.1/Mul)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SCALE: /patch_embeddings/layer3/block/block.1/block.1.1/fn/fn.1/Constant_2_output_0 + (Unnamed Layer* 155) [Shuffle] + /patch_embeddings/layer3/block/block.1/block.1.1/fn/fn.1/Mul_1 + /patch_embeddings/layer3/block/block.1/block.1.1/fn/fn.2/BatchNormalization
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /patch_embeddings/layer3/block/block.1/block.1.1/fn/fn.3/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(/patch_embeddings/layer3/block/block.1/block.1.1/fn/fn.4/Constant_output_0 + (Unnamed Layer* 160) [Shuffle], /patch_embeddings/layer3/block/block.1/block.1.1/fn/fn.4/Div), /patch_embeddings/layer3/block/block.1/block.1.1/fn/fn.4/Erf), /patch_embeddings/layer3/block/block.1/block.1.1/fn/fn.4/Constant_1_output_0 + (Unnamed Layer* 164) [Shuffle] + /patch_embeddings/layer3/block/block.1/block.1.1/fn/fn.4/Add), /patch_embeddings/layer3/block/block.1/block.1.1/fn/fn.4/Mul)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SCALE: /patch_embeddings/layer3/block/block.1/block.1.1/fn/fn.4/Constant_2_output_0 + (Unnamed Layer* 168) [Shuffle] + /patch_embeddings/layer3/block/block.1/block.1.1/fn/fn.4/Mul_1 + /patch_embeddings/layer3/block/block.1/block.1.1/fn/fn.5/BatchNormalization
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] ELEMENTWISE: /patch_embeddings/layer3/block/block.1/block.1.1/Add
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /patch_embeddings/layer3/block/block.2/block.2.0/fn/fn.0/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(/patch_embeddings/layer3/block/block.2/block.2.0/fn/fn.1/Constant_output_0 + (Unnamed Layer* 174) [Shuffle], /patch_embeddings/layer3/block/block.2/block.2.0/fn/fn.1/Div), /patch_embeddings/layer3/block/block.2/block.2.0/fn/fn.1/Erf), /patch_embeddings/layer3/block/block.2/block.2.0/fn/fn.1/Constant_1_output_0 + (Unnamed Layer* 178) [Shuffle] + /patch_embeddings/layer3/block/block.2/block.2.0/fn/fn.1/Add), /patch_embeddings/layer3/block/block.2/block.2.0/fn/fn.1/Mul)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SCALE: /patch_embeddings/layer3/block/block.2/block.2.0/fn/fn.1/Constant_2_output_0 + (Unnamed Layer* 182) [Shuffle] + /patch_embeddings/layer3/block/block.2/block.2.0/fn/fn.1/Mul_1 + /patch_embeddings/layer3/block/block.2/block.2.0/fn/fn.2/BatchNormalization
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] ELEMENTWISE: /patch_embeddings/layer3/block/block.2/block.2.0/Add
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /patch_embeddings/layer3/block/block.2/block.2.1/fn/fn.0/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(/patch_embeddings/layer3/block/block.2/block.2.1/fn/fn.1/Constant_output_0 + (Unnamed Layer* 188) [Shuffle], /patch_embeddings/layer3/block/block.2/block.2.1/fn/fn.1/Div), /patch_embeddings/layer3/block/block.2/block.2.1/fn/fn.1/Erf), /patch_embeddings/layer3/block/block.2/block.2.1/fn/fn.1/Constant_1_output_0 + (Unnamed Layer* 192) [Shuffle] + /patch_embeddings/layer3/block/block.2/block.2.1/fn/fn.1/Add), /patch_embeddings/layer3/block/block.2/block.2.1/fn/fn.1/Mul)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SCALE: /patch_embeddings/layer3/block/block.2/block.2.1/fn/fn.1/Constant_2_output_0 + (Unnamed Layer* 196) [Shuffle] + /patch_embeddings/layer3/block/block.2/block.2.1/fn/fn.1/Mul_1 + /patch_embeddings/layer3/block/block.2/block.2.1/fn/fn.2/BatchNormalization
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /patch_embeddings/layer3/block/block.2/block.2.1/fn/fn.3/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(/patch_embeddings/layer3/block/block.2/block.2.1/fn/fn.4/Constant_output_0 + (Unnamed Layer* 201) [Shuffle], /patch_embeddings/layer3/block/block.2/block.2.1/fn/fn.4/Div), /patch_embeddings/layer3/block/block.2/block.2.1/fn/fn.4/Erf), /patch_embeddings/layer3/block/block.2/block.2.1/fn/fn.4/Constant_1_output_0 + (Unnamed Layer* 205) [Shuffle] + /patch_embeddings/layer3/block/block.2/block.2.1/fn/fn.4/Add), /patch_embeddings/layer3/block/block.2/block.2.1/fn/fn.4/Mul)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SCALE: /patch_embeddings/layer3/block/block.2/block.2.1/fn/fn.4/Constant_2_output_0 + (Unnamed Layer* 209) [Shuffle] + /patch_embeddings/layer3/block/block.2/block.2.1/fn/fn.4/Mul_1 + /patch_embeddings/layer3/block/block.2/block.2.1/fn/fn.5/BatchNormalization
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] ELEMENTWISE: /patch_embeddings/layer3/block/block.2/block.2.1/Add
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /patch_embeddings/layer3/up/up.0/Conv + /patch_embeddings/layer3/up/up.2/Relu
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POOLING: /down/MaxPool
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.0/LocalAgg/pos_embed/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(/lklgl_bottleneck.0/LocalAgg/sg/Sigmoid), PWN(/lklgl_bottleneck.0/LocalAgg/Constant_output_0 + (Unnamed Layer* 219) [Shuffle], /lklgl_bottleneck.0/LocalAgg/Sub)), /lklgl_bottleneck.0/LocalAgg/Mul), /lklgl_bottleneck.0/LocalAgg/Add)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SCALE: /lklgl_bottleneck.0/LocalAgg/norm1/BatchNormalization
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.0/LocalAgg/conv1/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.0/LocalAgg/attn/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.0/LocalAgg/conv2/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(/lklgl_bottleneck.0/LocalAgg/sg_1/Sigmoid), PWN(/lklgl_bottleneck.0/LocalAgg/Constant_1_output_0 + (Unnamed Layer* 229) [Shuffle], /lklgl_bottleneck.0/LocalAgg/Sub_1)), /lklgl_bottleneck.0/LocalAgg/Mul_1), /lklgl_bottleneck.0/LocalAgg/Add_1)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SCALE: /lklgl_bottleneck.0/LocalAgg/norm2/BatchNormalization
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.0/LocalAgg/mlp/fc1/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(PWN(/lklgl_bottleneck.0/LocalAgg/mlp/act/Constant_output_0 + (Unnamed Layer* 236) [Shuffle], /lklgl_bottleneck.0/LocalAgg/mlp/act/Div), /lklgl_bottleneck.0/LocalAgg/mlp/act/Erf), /lklgl_bottleneck.0/LocalAgg/mlp/act/Constant_1_output_0 + (Unnamed Layer* 240) [Shuffle] + /lklgl_bottleneck.0/LocalAgg/mlp/act/Add), /lklgl_bottleneck.0/LocalAgg/mlp/act/Mul), /lklgl_bottleneck.0/LocalAgg/mlp/act/Constant_2_output_0 + (Unnamed Layer* 244) [Shuffle] + /lklgl_bottleneck.0/LocalAgg/mlp/act/Mul_1)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.0/LocalAgg/mlp/fc2/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(/lklgl_bottleneck.0/LocalAgg/sg_2/Sigmoid), PWN(/lklgl_bottleneck.0/LocalAgg/Constant_2_output_0 + (Unnamed Layer* 249) [Shuffle], /lklgl_bottleneck.0/LocalAgg/Sub_2)), /lklgl_bottleneck.0/LocalAgg/Mul_2), /lklgl_bottleneck.0/LocalAgg/Add_2)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.0.SelfAttn.norm1.bias + (Unnamed Layer* 276) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.0.SelfAttn.norm1.weight + (Unnamed Layer* 273) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.0/SelfAttn/pos_embed/Conv + /lklgl_bottleneck.0/SelfAttn/Add
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: /lklgl_bottleneck.0/SelfAttn/Reshape + /lklgl_bottleneck.0/SelfAttn/Transpose
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] REDUCE: /lklgl_bottleneck.0/SelfAttn/norm1/ReduceMean
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] ELEMENTWISE: /lklgl_bottleneck.0/SelfAttn/norm1/Sub
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(/lklgl_bottleneck.0/SelfAttn/norm1/Constant_output_0 + (Unnamed Layer* 264) [Shuffle], /lklgl_bottleneck.0/SelfAttn/norm1/Pow)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] REDUCE: /lklgl_bottleneck.0/SelfAttn/norm1/ReduceMean_1
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(PWN(/lklgl_bottleneck.0/SelfAttn/norm1/Constant_1_output_0 + (Unnamed Layer* 268) [Shuffle], /lklgl_bottleneck.0/SelfAttn/norm1/Add), /lklgl_bottleneck.0/SelfAttn/norm1/Sqrt), /lklgl_bottleneck.0/SelfAttn/norm1/Div), /lklgl_bottleneck.0/SelfAttn/norm1/Mul), /lklgl_bottleneck.0/SelfAttn/norm1/Add_1)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: /lklgl_bottleneck.0/SelfAttn/attn/Transpose + /lklgl_bottleneck.0/SelfAttn/attn/Reshape
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POOLING: /lklgl_bottleneck.0/SelfAttn/attn/sampler/AveragePool
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] MYELIN: {ForeignNode[/lklgl_bottleneck.0/SelfAttn/Constant_1_output_0.../lklgl_bottleneck.0/SelfAttn/attn/Reshape_4]}
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] DECONVOLUTION: /lklgl_bottleneck.0/SelfAttn/attn/LocalProp/ConvTranspose
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.0.SelfAttn.attn.proj.bias + (Unnamed Layer* 337) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.0.SelfAttn.attn.norm.bias + (Unnamed Layer* 331) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.0.SelfAttn.attn.norm.weight + (Unnamed Layer* 328) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: /lklgl_bottleneck.0/SelfAttn/attn/Reshape_5 + /lklgl_bottleneck.0/SelfAttn/attn/Transpose_6
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] REDUCE: /lklgl_bottleneck.0/SelfAttn/attn/norm/ReduceMean
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] ELEMENTWISE: /lklgl_bottleneck.0/SelfAttn/attn/norm/Sub
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(/lklgl_bottleneck.0/SelfAttn/attn/norm/Constant_output_0 + (Unnamed Layer* 319) [Shuffle], /lklgl_bottleneck.0/SelfAttn/attn/norm/Pow)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] REDUCE: /lklgl_bottleneck.0/SelfAttn/attn/norm/ReduceMean_1
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(PWN(/lklgl_bottleneck.0/SelfAttn/attn/norm/Constant_1_output_0 + (Unnamed Layer* 323) [Shuffle], /lklgl_bottleneck.0/SelfAttn/attn/norm/Add), /lklgl_bottleneck.0/SelfAttn/attn/norm/Sqrt), /lklgl_bottleneck.0/SelfAttn/attn/norm/Div), /lklgl_bottleneck.0/SelfAttn/attn/norm/Mul), /lklgl_bottleneck.0/SelfAttn/attn/norm/Add_1)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: reshape_before_/lklgl_bottleneck.0/SelfAttn/attn/proj/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.0/SelfAttn/attn/proj/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: reshape_after_/lklgl_bottleneck.0/SelfAttn/attn/proj/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(/lklgl_bottleneck.0/SelfAttn/attn/proj/Add, /lklgl_bottleneck.0/SelfAttn/Add_1)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.0.SelfAttn.mlp.fc2.bias + (Unnamed Layer* 378) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.0.SelfAttn.mlp.fc1.bias + (Unnamed Layer* 361) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.0.SelfAttn.norm2.bias + (Unnamed Layer* 355) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.0.SelfAttn.norm2.weight + (Unnamed Layer* 352) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] REDUCE: /lklgl_bottleneck.0/SelfAttn/norm2/ReduceMean
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] ELEMENTWISE: /lklgl_bottleneck.0/SelfAttn/norm2/Sub
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(/lklgl_bottleneck.0/SelfAttn/norm2/Constant_output_0 + (Unnamed Layer* 343) [Shuffle], /lklgl_bottleneck.0/SelfAttn/norm2/Pow)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] REDUCE: /lklgl_bottleneck.0/SelfAttn/norm2/ReduceMean_1
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(PWN(/lklgl_bottleneck.0/SelfAttn/norm2/Constant_1_output_0 + (Unnamed Layer* 347) [Shuffle], /lklgl_bottleneck.0/SelfAttn/norm2/Add), /lklgl_bottleneck.0/SelfAttn/norm2/Sqrt), /lklgl_bottleneck.0/SelfAttn/norm2/Div), /lklgl_bottleneck.0/SelfAttn/norm2/Mul), /lklgl_bottleneck.0/SelfAttn/norm2/Add_1)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: reshape_before_/lklgl_bottleneck.0/SelfAttn/mlp/fc1/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.0/SelfAttn/mlp/fc1/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: reshape_after_/lklgl_bottleneck.0/SelfAttn/mlp/fc1/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(/lklgl_bottleneck.0/SelfAttn/mlp/fc1/Add, PWN(PWN(PWN(PWN(PWN(/lklgl_bottleneck.0/SelfAttn/mlp/act/Constant_output_0 + (Unnamed Layer* 364) [Shuffle], /lklgl_bottleneck.0/SelfAttn/mlp/act/Div), /lklgl_bottleneck.0/SelfAttn/mlp/act/Erf), PWN(/lklgl_bottleneck.0/SelfAttn/mlp/act/Constant_1_output_0 + (Unnamed Layer* 368) [Shuffle], /lklgl_bottleneck.0/SelfAttn/mlp/act/Add)), /lklgl_bottleneck.0/SelfAttn/mlp/act/Mul), PWN(/lklgl_bottleneck.0/SelfAttn/mlp/act/Constant_2_output_0 + (Unnamed Layer* 372) [Shuffle], /lklgl_bottleneck.0/SelfAttn/mlp/act/Mul_1)))
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: reshape_before_/lklgl_bottleneck.0/SelfAttn/mlp/fc2/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.0/SelfAttn/mlp/fc2/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: reshape_after_/lklgl_bottleneck.0/SelfAttn/mlp/fc2/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(/lklgl_bottleneck.0/SelfAttn/mlp/fc2/Add, /lklgl_bottleneck.0/SelfAttn/Add_2)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: /lklgl_bottleneck.0/SelfAttn/Transpose_1 + /lklgl_bottleneck.0/SelfAttn/Reshape_1
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.1/LocalAgg/pos_embed/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(/lklgl_bottleneck.1/LocalAgg/sg/Sigmoid), PWN(/lklgl_bottleneck.1/LocalAgg/Constant_output_0 + (Unnamed Layer* 386) [Shuffle], /lklgl_bottleneck.1/LocalAgg/Sub)), /lklgl_bottleneck.1/LocalAgg/Mul), /lklgl_bottleneck.1/LocalAgg/Add)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SCALE: /lklgl_bottleneck.1/LocalAgg/norm1/BatchNormalization
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.1/LocalAgg/conv1/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.1/LocalAgg/attn/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.1/LocalAgg/conv2/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(/lklgl_bottleneck.1/LocalAgg/sg_1/Sigmoid), PWN(/lklgl_bottleneck.1/LocalAgg/Constant_1_output_0 + (Unnamed Layer* 396) [Shuffle], /lklgl_bottleneck.1/LocalAgg/Sub_1)), /lklgl_bottleneck.1/LocalAgg/Mul_1), /lklgl_bottleneck.1/LocalAgg/Add_1)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SCALE: /lklgl_bottleneck.1/LocalAgg/norm2/BatchNormalization
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.1/LocalAgg/mlp/fc1/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(PWN(/lklgl_bottleneck.1/LocalAgg/mlp/act/Constant_output_0 + (Unnamed Layer* 403) [Shuffle], /lklgl_bottleneck.1/LocalAgg/mlp/act/Div), /lklgl_bottleneck.1/LocalAgg/mlp/act/Erf), /lklgl_bottleneck.1/LocalAgg/mlp/act/Constant_1_output_0 + (Unnamed Layer* 407) [Shuffle] + /lklgl_bottleneck.1/LocalAgg/mlp/act/Add), /lklgl_bottleneck.1/LocalAgg/mlp/act/Mul), /lklgl_bottleneck.1/LocalAgg/mlp/act/Constant_2_output_0 + (Unnamed Layer* 411) [Shuffle] + /lklgl_bottleneck.1/LocalAgg/mlp/act/Mul_1)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.1/LocalAgg/mlp/fc2/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(/lklgl_bottleneck.1/LocalAgg/sg_2/Sigmoid), PWN(/lklgl_bottleneck.1/LocalAgg/Constant_2_output_0 + (Unnamed Layer* 416) [Shuffle], /lklgl_bottleneck.1/LocalAgg/Sub_2)), /lklgl_bottleneck.1/LocalAgg/Mul_2), /lklgl_bottleneck.1/LocalAgg/Add_2)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.1.SelfAttn.norm1.bias + (Unnamed Layer* 443) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.1.SelfAttn.norm1.weight + (Unnamed Layer* 440) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.1/SelfAttn/pos_embed/Conv + /lklgl_bottleneck.1/SelfAttn/Add
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: /lklgl_bottleneck.1/SelfAttn/Reshape + /lklgl_bottleneck.1/SelfAttn/Transpose
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] REDUCE: /lklgl_bottleneck.1/SelfAttn/norm1/ReduceMean
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] ELEMENTWISE: /lklgl_bottleneck.1/SelfAttn/norm1/Sub
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(/lklgl_bottleneck.1/SelfAttn/norm1/Constant_output_0 + (Unnamed Layer* 431) [Shuffle], /lklgl_bottleneck.1/SelfAttn/norm1/Pow)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] REDUCE: /lklgl_bottleneck.1/SelfAttn/norm1/ReduceMean_1
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(PWN(/lklgl_bottleneck.1/SelfAttn/norm1/Constant_1_output_0 + (Unnamed Layer* 435) [Shuffle], /lklgl_bottleneck.1/SelfAttn/norm1/Add), /lklgl_bottleneck.1/SelfAttn/norm1/Sqrt), /lklgl_bottleneck.1/SelfAttn/norm1/Div), /lklgl_bottleneck.1/SelfAttn/norm1/Mul), /lklgl_bottleneck.1/SelfAttn/norm1/Add_1)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: /lklgl_bottleneck.1/SelfAttn/attn/Transpose + /lklgl_bottleneck.1/SelfAttn/attn/Reshape
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POOLING: /lklgl_bottleneck.1/SelfAttn/attn/sampler/AveragePool
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] MYELIN: {ForeignNode[lklgl_bottleneck.1.SelfAttn.attn.qkv.bias + (Unnamed Layer* 458) [Shuffle].../lklgl_bottleneck.1/SelfAttn/attn/Reshape_4]}
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] DECONVOLUTION: /lklgl_bottleneck.1/SelfAttn/attn/LocalProp/ConvTranspose
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.1.SelfAttn.attn.proj.bias + (Unnamed Layer* 501) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.1.SelfAttn.attn.norm.bias + (Unnamed Layer* 495) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.1.SelfAttn.attn.norm.weight + (Unnamed Layer* 492) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: /lklgl_bottleneck.1/SelfAttn/attn/Reshape_5 + /lklgl_bottleneck.1/SelfAttn/attn/Transpose_6
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] REDUCE: /lklgl_bottleneck.1/SelfAttn/attn/norm/ReduceMean
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] ELEMENTWISE: /lklgl_bottleneck.1/SelfAttn/attn/norm/Sub
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(/lklgl_bottleneck.1/SelfAttn/attn/norm/Constant_output_0 + (Unnamed Layer* 483) [Shuffle], /lklgl_bottleneck.1/SelfAttn/attn/norm/Pow)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] REDUCE: /lklgl_bottleneck.1/SelfAttn/attn/norm/ReduceMean_1
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(PWN(/lklgl_bottleneck.1/SelfAttn/attn/norm/Constant_1_output_0 + (Unnamed Layer* 487) [Shuffle], /lklgl_bottleneck.1/SelfAttn/attn/norm/Add), /lklgl_bottleneck.1/SelfAttn/attn/norm/Sqrt), /lklgl_bottleneck.1/SelfAttn/attn/norm/Div), /lklgl_bottleneck.1/SelfAttn/attn/norm/Mul), /lklgl_bottleneck.1/SelfAttn/attn/norm/Add_1)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: reshape_before_/lklgl_bottleneck.1/SelfAttn/attn/proj/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.1/SelfAttn/attn/proj/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: reshape_after_/lklgl_bottleneck.1/SelfAttn/attn/proj/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(/lklgl_bottleneck.1/SelfAttn/attn/proj/Add, /lklgl_bottleneck.1/SelfAttn/Add_1)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.1.SelfAttn.mlp.fc2.bias + (Unnamed Layer* 542) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.1.SelfAttn.mlp.fc1.bias + (Unnamed Layer* 525) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.1.SelfAttn.norm2.bias + (Unnamed Layer* 519) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.1.SelfAttn.norm2.weight + (Unnamed Layer* 516) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] REDUCE: /lklgl_bottleneck.1/SelfAttn/norm2/ReduceMean
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] ELEMENTWISE: /lklgl_bottleneck.1/SelfAttn/norm2/Sub
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(/lklgl_bottleneck.1/SelfAttn/norm2/Constant_output_0 + (Unnamed Layer* 507) [Shuffle], /lklgl_bottleneck.1/SelfAttn/norm2/Pow)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] REDUCE: /lklgl_bottleneck.1/SelfAttn/norm2/ReduceMean_1
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(PWN(/lklgl_bottleneck.1/SelfAttn/norm2/Constant_1_output_0 + (Unnamed Layer* 511) [Shuffle], /lklgl_bottleneck.1/SelfAttn/norm2/Add), /lklgl_bottleneck.1/SelfAttn/norm2/Sqrt), /lklgl_bottleneck.1/SelfAttn/norm2/Div), /lklgl_bottleneck.1/SelfAttn/norm2/Mul), /lklgl_bottleneck.1/SelfAttn/norm2/Add_1)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: reshape_before_/lklgl_bottleneck.1/SelfAttn/mlp/fc1/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.1/SelfAttn/mlp/fc1/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: reshape_after_/lklgl_bottleneck.1/SelfAttn/mlp/fc1/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(/lklgl_bottleneck.1/SelfAttn/mlp/fc1/Add, PWN(PWN(PWN(PWN(PWN(/lklgl_bottleneck.1/SelfAttn/mlp/act/Constant_output_0 + (Unnamed Layer* 528) [Shuffle], /lklgl_bottleneck.1/SelfAttn/mlp/act/Div), /lklgl_bottleneck.1/SelfAttn/mlp/act/Erf), PWN(/lklgl_bottleneck.1/SelfAttn/mlp/act/Constant_1_output_0 + (Unnamed Layer* 532) [Shuffle], /lklgl_bottleneck.1/SelfAttn/mlp/act/Add)), /lklgl_bottleneck.1/SelfAttn/mlp/act/Mul), PWN(/lklgl_bottleneck.1/SelfAttn/mlp/act/Constant_2_output_0 + (Unnamed Layer* 536) [Shuffle], /lklgl_bottleneck.1/SelfAttn/mlp/act/Mul_1)))
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: reshape_before_/lklgl_bottleneck.1/SelfAttn/mlp/fc2/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.1/SelfAttn/mlp/fc2/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: reshape_after_/lklgl_bottleneck.1/SelfAttn/mlp/fc2/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(/lklgl_bottleneck.1/SelfAttn/mlp/fc2/Add, /lklgl_bottleneck.1/SelfAttn/Add_2)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: /lklgl_bottleneck.1/SelfAttn/Transpose_1 + /lklgl_bottleneck.1/SelfAttn/Reshape_1
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.2/LocalAgg/pos_embed/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(/lklgl_bottleneck.2/LocalAgg/sg/Sigmoid), PWN(/lklgl_bottleneck.2/LocalAgg/Constant_output_0 + (Unnamed Layer* 550) [Shuffle], /lklgl_bottleneck.2/LocalAgg/Sub)), /lklgl_bottleneck.2/LocalAgg/Mul), /lklgl_bottleneck.2/LocalAgg/Add)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SCALE: /lklgl_bottleneck.2/LocalAgg/norm1/BatchNormalization
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.2/LocalAgg/conv1/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.2/LocalAgg/attn/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.2/LocalAgg/conv2/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(/lklgl_bottleneck.2/LocalAgg/sg_1/Sigmoid), PWN(/lklgl_bottleneck.2/LocalAgg/Constant_1_output_0 + (Unnamed Layer* 560) [Shuffle], /lklgl_bottleneck.2/LocalAgg/Sub_1)), /lklgl_bottleneck.2/LocalAgg/Mul_1), /lklgl_bottleneck.2/LocalAgg/Add_1)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SCALE: /lklgl_bottleneck.2/LocalAgg/norm2/BatchNormalization
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.2/LocalAgg/mlp/fc1/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(PWN(/lklgl_bottleneck.2/LocalAgg/mlp/act/Constant_output_0 + (Unnamed Layer* 567) [Shuffle], /lklgl_bottleneck.2/LocalAgg/mlp/act/Div), /lklgl_bottleneck.2/LocalAgg/mlp/act/Erf), /lklgl_bottleneck.2/LocalAgg/mlp/act/Constant_1_output_0 + (Unnamed Layer* 571) [Shuffle] + /lklgl_bottleneck.2/LocalAgg/mlp/act/Add), /lklgl_bottleneck.2/LocalAgg/mlp/act/Mul), /lklgl_bottleneck.2/LocalAgg/mlp/act/Constant_2_output_0 + (Unnamed Layer* 575) [Shuffle] + /lklgl_bottleneck.2/LocalAgg/mlp/act/Mul_1)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.2/LocalAgg/mlp/fc2/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(/lklgl_bottleneck.2/LocalAgg/sg_2/Sigmoid), PWN(/lklgl_bottleneck.2/LocalAgg/Constant_2_output_0 + (Unnamed Layer* 580) [Shuffle], /lklgl_bottleneck.2/LocalAgg/Sub_2)), /lklgl_bottleneck.2/LocalAgg/Mul_2), /lklgl_bottleneck.2/LocalAgg/Add_2)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.2.SelfAttn.norm1.bias + (Unnamed Layer* 607) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.2.SelfAttn.norm1.weight + (Unnamed Layer* 604) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.2/SelfAttn/pos_embed/Conv + /lklgl_bottleneck.2/SelfAttn/Add
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: /lklgl_bottleneck.2/SelfAttn/Reshape + /lklgl_bottleneck.2/SelfAttn/Transpose
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] REDUCE: /lklgl_bottleneck.2/SelfAttn/norm1/ReduceMean
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] ELEMENTWISE: /lklgl_bottleneck.2/SelfAttn/norm1/Sub
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(/lklgl_bottleneck.2/SelfAttn/norm1/Constant_output_0 + (Unnamed Layer* 595) [Shuffle], /lklgl_bottleneck.2/SelfAttn/norm1/Pow)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] REDUCE: /lklgl_bottleneck.2/SelfAttn/norm1/ReduceMean_1
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(PWN(/lklgl_bottleneck.2/SelfAttn/norm1/Constant_1_output_0 + (Unnamed Layer* 599) [Shuffle], /lklgl_bottleneck.2/SelfAttn/norm1/Add), /lklgl_bottleneck.2/SelfAttn/norm1/Sqrt), /lklgl_bottleneck.2/SelfAttn/norm1/Div), /lklgl_bottleneck.2/SelfAttn/norm1/Mul), /lklgl_bottleneck.2/SelfAttn/norm1/Add_1)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: /lklgl_bottleneck.2/SelfAttn/attn/Transpose + /lklgl_bottleneck.2/SelfAttn/attn/Reshape
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POOLING: /lklgl_bottleneck.2/SelfAttn/attn/sampler/AveragePool
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] MYELIN: {ForeignNode[lklgl_bottleneck.2.SelfAttn.attn.qkv.bias + (Unnamed Layer* 622) [Shuffle].../lklgl_bottleneck.2/SelfAttn/attn/Reshape_4]}
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] DECONVOLUTION: /lklgl_bottleneck.2/SelfAttn/attn/LocalProp/ConvTranspose
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.2.SelfAttn.attn.proj.bias + (Unnamed Layer* 665) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.2.SelfAttn.attn.norm.bias + (Unnamed Layer* 659) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.2.SelfAttn.attn.norm.weight + (Unnamed Layer* 656) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: /lklgl_bottleneck.2/SelfAttn/attn/Reshape_5 + /lklgl_bottleneck.2/SelfAttn/attn/Transpose_6
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] REDUCE: /lklgl_bottleneck.2/SelfAttn/attn/norm/ReduceMean
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] ELEMENTWISE: /lklgl_bottleneck.2/SelfAttn/attn/norm/Sub
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(/lklgl_bottleneck.2/SelfAttn/attn/norm/Constant_output_0 + (Unnamed Layer* 647) [Shuffle], /lklgl_bottleneck.2/SelfAttn/attn/norm/Pow)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] REDUCE: /lklgl_bottleneck.2/SelfAttn/attn/norm/ReduceMean_1
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(PWN(/lklgl_bottleneck.2/SelfAttn/attn/norm/Constant_1_output_0 + (Unnamed Layer* 651) [Shuffle], /lklgl_bottleneck.2/SelfAttn/attn/norm/Add), /lklgl_bottleneck.2/SelfAttn/attn/norm/Sqrt), /lklgl_bottleneck.2/SelfAttn/attn/norm/Div), /lklgl_bottleneck.2/SelfAttn/attn/norm/Mul), /lklgl_bottleneck.2/SelfAttn/attn/norm/Add_1)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: reshape_before_/lklgl_bottleneck.2/SelfAttn/attn/proj/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.2/SelfAttn/attn/proj/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: reshape_after_/lklgl_bottleneck.2/SelfAttn/attn/proj/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(/lklgl_bottleneck.2/SelfAttn/attn/proj/Add, /lklgl_bottleneck.2/SelfAttn/Add_1)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.2.SelfAttn.mlp.fc2.bias + (Unnamed Layer* 706) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.2.SelfAttn.mlp.fc1.bias + (Unnamed Layer* 689) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.2.SelfAttn.norm2.bias + (Unnamed Layer* 683) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONSTANT: lklgl_bottleneck.2.SelfAttn.norm2.weight + (Unnamed Layer* 680) [Shuffle]
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] REDUCE: /lklgl_bottleneck.2/SelfAttn/norm2/ReduceMean
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] ELEMENTWISE: /lklgl_bottleneck.2/SelfAttn/norm2/Sub
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(/lklgl_bottleneck.2/SelfAttn/norm2/Constant_output_0 + (Unnamed Layer* 671) [Shuffle], /lklgl_bottleneck.2/SelfAttn/norm2/Pow)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] REDUCE: /lklgl_bottleneck.2/SelfAttn/norm2/ReduceMean_1
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(PWN(PWN(PWN(PWN(/lklgl_bottleneck.2/SelfAttn/norm2/Constant_1_output_0 + (Unnamed Layer* 675) [Shuffle], /lklgl_bottleneck.2/SelfAttn/norm2/Add), /lklgl_bottleneck.2/SelfAttn/norm2/Sqrt), /lklgl_bottleneck.2/SelfAttn/norm2/Div), /lklgl_bottleneck.2/SelfAttn/norm2/Mul), /lklgl_bottleneck.2/SelfAttn/norm2/Add_1)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: reshape_before_/lklgl_bottleneck.2/SelfAttn/mlp/fc1/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.2/SelfAttn/mlp/fc1/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: reshape_after_/lklgl_bottleneck.2/SelfAttn/mlp/fc1/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(/lklgl_bottleneck.2/SelfAttn/mlp/fc1/Add, PWN(PWN(PWN(PWN(PWN(/lklgl_bottleneck.2/SelfAttn/mlp/act/Constant_output_0 + (Unnamed Layer* 692) [Shuffle], /lklgl_bottleneck.2/SelfAttn/mlp/act/Div), /lklgl_bottleneck.2/SelfAttn/mlp/act/Erf), PWN(/lklgl_bottleneck.2/SelfAttn/mlp/act/Constant_1_output_0 + (Unnamed Layer* 696) [Shuffle], /lklgl_bottleneck.2/SelfAttn/mlp/act/Add)), /lklgl_bottleneck.2/SelfAttn/mlp/act/Mul), PWN(/lklgl_bottleneck.2/SelfAttn/mlp/act/Constant_2_output_0 + (Unnamed Layer* 700) [Shuffle], /lklgl_bottleneck.2/SelfAttn/mlp/act/Mul_1)))
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: reshape_before_/lklgl_bottleneck.2/SelfAttn/mlp/fc2/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /lklgl_bottleneck.2/SelfAttn/mlp/fc2/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: reshape_after_/lklgl_bottleneck.2/SelfAttn/mlp/fc2/MatMul
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POINTWISE: PWN(/lklgl_bottleneck.2/SelfAttn/mlp/fc2/Add, /lklgl_bottleneck.2/SelfAttn/Add_2)
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] SHUFFLE: /lklgl_bottleneck.2/SelfAttn/Transpose_1 + /lklgl_bottleneck.2/SelfAttn/Reshape_1
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /expend_dims/conv/conv.0/Conv + /expend_dims/conv/conv.2/Relu
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /expend_dims/conv/conv.3/Conv + /expend_dims/conv/conv.5/Relu
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /transformer_bottleneck.0/SelfAttn/pos_embed/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] MYELIN: {ForeignNode[transformer_bottleneck.0.SelfAttn.attn.qkv.bias + (Unnamed Layer* 744) [Shuffle].../transformer_bottleneck.0/SelfAttn/Transpose_1 + /transformer_bottleneck.0/SelfAttn/Reshape_1]}
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /transformer_bottleneck.1/SelfAttn/pos_embed/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] MYELIN: {ForeignNode[transformer_bottleneck.1.SelfAttn.attn.qkv.bias + (Unnamed Layer* 840) [Shuffle].../transformer_bottleneck.1/SelfAttn/Transpose_1 + /transformer_bottleneck.1/SelfAttn/Reshape_1]}
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /transformer_bottleneck.2/SelfAttn/pos_embed/Conv
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] MYELIN: {ForeignNode[/transformer_bottleneck.2/SelfAttn/Add.../transformer_bottleneck.2/SelfAttn/Transpose_1 + /transformer_bottleneck.2/SelfAttn/Reshape_1]}
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POOLING: /down_3/MaxPool
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POOLING: /down_2/MaxPool
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] POOLING: /down_1/MaxPool
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /reduce_dims/conv/conv.0/Conv + /reduce_dims/conv/conv.2/Relu
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /reduce_dims/conv/conv.3/Conv + /reduce_dims/conv/conv.5/Relu
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /Up_conv4/conv/conv.0/Conv + /Up_conv4/conv/conv.2/Relu
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /Up_conv4/conv/conv.3/Conv + /Up_conv4/conv/conv.5/Relu
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] RESIZE: /Up3/up/up.0/Resize
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /Up3/up/up.1/Conv + /Up3/up/up.3/Relu
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /Up_conv3/conv/conv.0/Conv + /Up_conv3/conv/conv.2/Relu
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /Up_conv3/conv/conv.3/Conv + /Up_conv3/conv/conv.5/Relu
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] RESIZE: /Up2/up/up.0/Resize
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /Up2/up/up.1/Conv + /Up2/up/up.3/Relu
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] COPY: /Up2/up/up.3/Relu_output_0 copy
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /Up_conv2/conv/conv.0/Conv + /Up_conv2/conv/conv.2/Relu
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /Up_conv2/conv/conv.3/Conv + /Up_conv2/conv/conv.5/Relu
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] RESIZE: /Up1/up/up.0/Resize
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /Up1/up/up.1/Conv + /Up1/up/up.3/Relu
+[10/03/2026-16:55:17] [I] [TRT] [GpuLayer] CONVOLUTION: /head/Conv
+[10/03/2026-16:55:22] [I] [TRT] [MemUsageChange] Init cuBLAS/cuBLASLt: CPU +535, GPU +504, now: CPU 1119, GPU 5749 (MiB)
+[10/03/2026-16:55:23] [I] [TRT] [MemUsageChange] Init cuDNN: CPU +82, GPU +70, now: CPU 1201, GPU 5819 (MiB)
+[10/03/2026-16:55:23] [I] [TRT] Local timing cache in use. Profiling results in this builder pass will not be stored.
+[10/03/2026-17:12:13] [I] [TRT] [GraphReduction] The approximate region cut reduction algorithm is called.
+[10/03/2026-17:12:13] [I] [TRT] Total Activation Memory: 16479690752
+[10/03/2026-17:12:13] [I] [TRT] Detected 1 inputs and 1 output network tensors.
+[10/03/2026-17:12:15] [I] [TRT] Total Host Persistent Memory: 171904
+[10/03/2026-17:12:15] [I] [TRT] Total Device Persistent Memory: 961536
+[10/03/2026-17:12:15] [I] [TRT] Total Scratch Memory: 134217728
+[10/03/2026-17:12:15] [I] [TRT] [MemUsageStats] Peak memory usage of TRT CPU/GPU memory allocators: CPU 1 MiB, GPU 617 MiB
+[10/03/2026-17:12:15] [I] [TRT] [BlockAssignment] Started assigning block shifts. This will take 258 steps to complete.
+[10/03/2026-17:12:15] [I] [TRT] [BlockAssignment] Algorithm ShiftNTopDown took 146.433ms to assign 8 blocks to 258 nodes requiring 159387648 bytes.
+[10/03/2026-17:12:15] [I] [TRT] Total Activation Memory: 159387648
+[10/03/2026-17:12:16] [I] [TRT] [MemUsageChange] Init cuBLAS/cuBLASLt: CPU +0, GPU +0, now: CPU 1534, GPU 6700 (MiB)
+[10/03/2026-17:12:16] [I] [TRT] [MemUsageChange] Init cuDNN: CPU +1, GPU +0, now: CPU 1535, GPU 6700 (MiB)
+[10/03/2026-17:12:16] [I] [TRT] [MemUsageChange] TensorRT-managed allocation in building engine: CPU +0, GPU +8, now: CPU 0, GPU 8 (MiB)
+[10/03/2026-17:12:16] [I] Engine built in 1048.27 sec.
+[10/03/2026-17:12:17] [I] [TRT] Loaded engine size: 6 MiB
+[10/03/2026-17:12:17] [I] [TRT] [MemUsageChange] Init cuBLAS/cuBLASLt: CPU +0, GPU +0, now: CPU 1236, GPU 6710 (MiB)
+[10/03/2026-17:12:17] [I] [TRT] [MemUsageChange] Init cuDNN: CPU +1, GPU +0, now: CPU 1237, GPU 6710 (MiB)
+[10/03/2026-17:12:17] [I] [TRT] [MemUsageChange] TensorRT-managed allocation in engine deserialization: CPU +0, GPU +6, now: CPU 0, GPU 6 (MiB)
+[10/03/2026-17:12:17] [I] Engine deserialized in 0.169191 sec.
+[10/03/2026-17:12:17] [I] [TRT] [MemUsageChange] Init cuBLAS/cuBLASLt: CPU +0, GPU +0, now: CPU 1237, GPU 6710 (MiB)
+[10/03/2026-17:12:17] [I] [TRT] [MemUsageChange] Init cuDNN: CPU +0, GPU +0, now: CPU 1237, GPU 6710 (MiB)
+[10/03/2026-17:12:18] [I] [TRT] [MemUsageChange] TensorRT-managed allocation in IExecutionContext creation: CPU +0, GPU +153, now: CPU 0, GPU 159 (MiB)
+[10/03/2026-17:12:18] [I] Setting persistentCacheLimit to 0 bytes.
+[10/03/2026-17:12:18] [I] Using random values for input input
+[10/03/2026-17:12:18] [I] Created input binding for input with dimensions 1x3x256x256
+[10/03/2026-17:12:18] [I] Using random values for output output
+[10/03/2026-17:12:18] [I] Created output binding for output with dimensions 1x1x256x256
+[10/03/2026-17:12:18] [I] Starting inference
+[10/03/2026-17:12:21] [I] Warmup completed 3 queries over 200 ms
+[10/03/2026-17:12:21] [I] Timing trace has 35 queries over 3.20813 s
+[10/03/2026-17:12:21] [I] 
+[10/03/2026-17:12:21] [I] === Trace details ===
+[10/03/2026-17:12:21] [I] Trace averages of 10 runs:
+[10/03/2026-17:12:21] [I] Average on 10 runs - GPU latency: 89.1302 ms - Host latency: 89.2754 ms (enqueue 18.8075 ms)
+[10/03/2026-17:12:21] [I] Average on 10 runs - GPU latency: 89.1561 ms - Host latency: 89.3089 ms (enqueue 22.0505 ms)
+[10/03/2026-17:12:21] [I] Average on 10 runs - GPU latency: 89.1543 ms - Host latency: 89.31 ms (enqueue 21.707 ms)
+[10/03/2026-17:12:21] [I] 
+[10/03/2026-17:12:21] [I] === Performance summary ===
+[10/03/2026-17:12:21] [I] Throughput: 10.9098 qps
+[10/03/2026-17:12:21] [I] Latency: min = 88.8608 ms, max = 89.391 ms, mean = 89.2847 ms, median = 89.3066 ms, percentile(90%) = 89.3818 ms, percentile(95%) = 89.387 ms, percentile(99%) = 89.391 ms
+[10/03/2026-17:12:21] [I] Enqueue Time: min = 17.5495 ms, max = 23.2319 ms, mean = 21.0109 ms, median = 21.5266 ms, percentile(90%) = 22.6559 ms, percentile(95%) = 22.7471 ms, percentile(99%) = 23.2319 ms
+[10/03/2026-17:12:21] [I] H2D Latency: min = 0.117188 ms, max = 0.195435 ms, mean = 0.129364 ms, median = 0.122437 ms, percentile(90%) = 0.15564 ms, percentile(95%) = 0.18457 ms, percentile(99%) = 0.195435 ms
+[10/03/2026-17:12:21] [I] GPU Compute Time: min = 88.728 ms, max = 89.2471 ms, mean = 89.1349 ms, median = 89.1566 ms, percentile(90%) = 89.2269 ms, percentile(95%) = 89.2454 ms, percentile(99%) = 89.2471 ms
+[10/03/2026-17:12:21] [I] D2H Latency: min = 0.012207 ms, max = 0.0217285 ms, mean = 0.0204372 ms, median = 0.0206299 ms, percentile(90%) = 0.0212402 ms, percentile(95%) = 0.0216064 ms, percentile(99%) = 0.0217285 ms
+[10/03/2026-17:12:21] [I] Total Host Walltime: 3.20813 s
+[10/03/2026-17:12:21] [I] Total GPU Compute Time: 3.11972 s
+[10/03/2026-17:12:21] [I] Explanations of the performance metrics are printed in the verbose logs.
+[10/03/2026-17:12:21] [I] 
+&&&& PASSED TensorRT.trtexec [TensorRT v8502] # /usr/src/tensorrt/bin/trtexec --onnx=model_best_opset16.onnx --saveEngine=test_best_fp32.engine

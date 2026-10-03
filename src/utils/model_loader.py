@@ -209,9 +209,9 @@ def save_checkpoint(path, model, epoch, best_iou):
         "best_iou": best_iou,
     }, path)
 
-def resolve_ckpt_path(stem, suffix=".pth"):
-    """Resolve checkpoint path, trying variants: _best, _final, bare."""
-    variants = [f"{stem}_best", f"{stem}_final", stem]
+def resolve_ckpt_path(stem, suffix=".pth", best_only=False):
+    """Resolve a checkpoint; best_only disables final/bare fallback."""
+    variants = [f"{stem}_best"] if best_only else [f"{stem}_best", f"{stem}_final", stem]
     for v in variants:
         flat = os.path.join("checkpoint", f"{v}{suffix}")
         if os.path.exists(flat):
@@ -221,8 +221,11 @@ def resolve_ckpt_path(stem, suffix=".pth"):
             return sub
     if stem.endswith("_interrupted"):
         base = stem[:-len("_interrupted")]
-        for v in [f"{stem}_best", f"{stem}_final", stem]:
+        for v in variants:
             sub_int = os.path.join("checkpoint", base, f"{v}{suffix}")
             if os.path.exists(sub_int):
                 return sub_int
+    if best_only:
+        raise FileNotFoundError(f"Best checkpoint not found for stem: {stem}; "
+                                f"expected {stem}_best{suffix}")
     raise FileNotFoundError(f"Checkpoint not found for stem: {stem}")

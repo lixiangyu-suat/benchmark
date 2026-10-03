@@ -20,14 +20,25 @@ MODELS=("U_Net" "AttU_Net" "UNetplus_L3" "Mobile_U_ViT" "CMUNeXt")
 BASE_LRS=(0.01   0.01       0.005          0.001           0.0005)
 EPOCHS=(  20     20         40             60              80)
 
-EVAL_DATASETS=(                     # 评估所用的 3 个数据集
-    "./data/busi"
-    "./data/dataset_A"
-    "./data/dataset_B"
-)
+# 当前未纳入测试数据，默认只训练。测试图片加入 images/ 并准备清单后再填写：
+EVAL_DATASETS=()                    # 例如 ("./data/busi" "./data/iChallenge_GON")
+EVAL_TEST_FILES=()                  # 例如 ("test1.txt" "test1.txt")
+EVAL_MASK_TARGETS=()                # 例如 ("binary" "cup")
 
 LOG_DIR="batch_logs"
 # ===== 参数区结束 =====
+
+if [ "${#EVAL_DATASETS[@]}" -ne "${#EVAL_TEST_FILES[@]}" ] || \
+   [ "${#EVAL_DATASETS[@]}" -ne "${#EVAL_MASK_TARGETS[@]}" ]; then
+    echo "EVAL_DATASETS, EVAL_TEST_FILES and EVAL_MASK_TARGETS must have the same length" >&2
+    exit 2
+fi
+for j in "${!EVAL_DATASETS[@]}"; do
+    if [ ! -s "${EVAL_DATASETS[$j]}/${EVAL_TEST_FILES[$j]}" ]; then
+        echo "Missing or empty test manifest: ${EVAL_DATASETS[$j]}/${EVAL_TEST_FILES[$j]}" >&2
+        exit 2
+    fi
+done
 
 mkdir -p "$LOG_DIR"
 
@@ -59,13 +70,16 @@ for i in "${!MODELS[@]}"; do
         echo "=> Trained checkpoint: $CKPT_STEM"
 
         # ---- 在 3 个数据集上分别评估 ----
-        for ds in "${EVAL_DATASETS[@]}"; do
+        for j in "${!EVAL_DATASETS[@]}"; do
+            ds="${EVAL_DATASETS[$j]}"
             echo "------------------------------------------------------------"
             echo "Evaluating $CKPT_STEM on dataset: $ds"
             echo "------------------------------------------------------------"
             python evaluate.py \
                 --model "$CKPT_STEM" \
                 --data_dir "$ds" \
+                --test_file "${EVAL_TEST_FILES[$j]}" \
+                --mask_target "${EVAL_MASK_TARGETS[$j]}" \
                 --batch_size 8 \
                 --img_size 256 \
                 --gpu "$GPU"

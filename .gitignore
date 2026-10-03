@@ -1,5 +1,6 @@
 ﻿# Data
 data/
+predata/
 
 # Checkpoints & logs
 checkpoint/
@@ -9,6 +10,7 @@ tmp/
 runs/
 teacher_probs/
 validation_results/
+test_results/
 
 # Generated assets
 *.png

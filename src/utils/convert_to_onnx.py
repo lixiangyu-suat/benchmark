@@ -6,6 +6,7 @@ import onnx
 
 from src.utils.model_loader import load_checkpoint_meta
 
+OPSETVERSION = 16
 
 def convert_pth_to_onnx(
     model: nn.Module,
@@ -16,6 +17,7 @@ def convert_pth_to_onnx(
     output_names: list = None,
     dynamic_axes: dict = None,
     device: str = "cpu",
+    opset_version: int = OPSETVERSION,
 ) -> None:
     """将训练保存的 .pth 检查点导出为 .onnx 并校验。
 
@@ -52,7 +54,7 @@ def convert_pth_to_onnx(
         dummy_input,
         str(onnx_path),
         export_params=True,
-        opset_version=17,
+        opset_version=opset_version,
         do_constant_folding=True,
         input_names=input_names,
         output_names=output_names,
@@ -63,3 +65,6 @@ def convert_pth_to_onnx(
     onnx_model = onnx.load(str(onnx_path))
     onnx.checker.check_model(onnx_model)
     print(f"✓ ONNX 导出成功: {onnx_path}")
+    print(f"  实际 opset: {[(item.domain or 'ai.onnx', item.version) for item in onnx_model.opset_import]}")
+    print(f"  LayerNormalization 节点数量: "
+          f"{sum(node.op_type == 'LayerNormalization' for node in onnx_model.graph.node)}")

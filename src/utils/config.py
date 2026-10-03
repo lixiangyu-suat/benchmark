@@ -13,6 +13,7 @@ DEFAULTS = {
     "train_file": "busi_train1.txt",   # 相对 data_dir；留空则自动按比例划分
     "val_file": "busi_val1.txt",
     "val_split": 0.3,
+    "mask_target": "binary",  # BUSI: 0/255; REFUGE cup: 0 前景，128/255 背景
     # model
     "num_classes": 1,
     # train
@@ -43,22 +44,25 @@ SWINUNET_OPTS = {
 
 # ======== argparse 参数注册 ========
 
-def add_common_args(parser):
+def add_common_args(parser, include_split_args=True):
     """注册三条流水线共享的命令行参数。"""
     d = DEFAULTS
     parser.add_argument("--data_dir", type=str, default=d["data_dir"],
                         help=f"数据集根目录 (default: {d['data_dir']})")
     parser.add_argument("--seed", type=int, default=d["seed"],
                         help=f"数据划分与训练随机种子 (default: {d['seed']})")
-    parser.add_argument("--train_file", type=str, default=d["train_file"],
-                        help="训练集清单文件名（相对 data_dir）；"
-                             "与 --val_file 同时置空则按 val_split 自动划分")
-    parser.add_argument("--val_file", type=str, default=d["val_file"],
-                        help="验证集清单文件名（相对 data_dir）")
-    parser.add_argument("--val_split", type=float, default=d["val_split"],
-                        help=f"自动划分时验证集比例 (default: {d['val_split']})")
+    if include_split_args:
+        parser.add_argument("--train_file", type=str, default=d["train_file"],
+                            help="训练集清单文件名（相对 data_dir）；"
+                                 "与 --val_file 同时置空则按 val_split 自动划分")
+        parser.add_argument("--val_file", type=str, default=d["val_file"],
+                            help="验证集清单文件名（相对 data_dir）")
+        parser.add_argument("--val_split", type=float, default=d["val_split"],
+                            help=f"自动划分时验证集比例 (default: {d['val_split']})")
     parser.add_argument("--num_classes", type=int, default=d["num_classes"],
                         help=f"分割通道数，二分类为 1 (default: {d['num_classes']})")
+    parser.add_argument("--mask_target", choices=["binary", "cup"], default=d["mask_target"],
+                        help="binary: 0/255 二值掩码；cup: REFUGE 视杯（原值 0 为前景）")
     parser.add_argument("--gpu", type=str, default="0",
                         help="使用的 GPU 编号，写入 CUDA_VISIBLE_DEVICES (default: 0)")
     parser.add_argument("--custom_message", type=str, default=d["custom_message"],
@@ -95,6 +99,8 @@ def build_config(args):
             "train_file": g("train_file"),
             "val_file": g("val_file"),
             "val_split": g("val_split"),
+            "mask_target": g("mask_target"),
+            "test_file": getattr(args, "test_file", ""),
         },
         "model": {
             "num_classes": g("num_classes"),

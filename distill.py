@@ -11,11 +11,12 @@ if _PROJ_ROOT not in sys.path:
 
 import torch
 import torch.optim as optim
+from tqdm import tqdm
 from torch.utils.data import DataLoader
 
 from src.utils.config import add_common_args, add_train_args, build_config
 from src.utils.dataset import (DistillationDataset, MedicalDataset,
-                                load_split_ids,
+                                _resolve_split_ids,
                                 train_transform, val_transform)
 from src.utils.helpers import seed_everything, timestamp_short, format_duration
 from src.utils.losses import BCEDiceLoss
@@ -52,18 +53,18 @@ def generate_teacher_probs(config, teacher_model, save_dir):
 
     img_size = config["train"]["img_size"]
     base_dir = config["data"]["base_dir"]
-    train_ids, _ = load_split_ids(
-        base_dir, config["data"]["seed"], config["data"].get("val_split", 0.3)
-    )
+    train_ids, _ = _resolve_split_ids(base_dir, config)
 
     loader = DataLoader(
-        MedicalDataset(base_dir, "train", val_transform(img_size), train_ids),
+        MedicalDataset(base_dir, "train", val_transform(img_size), train_ids,
+                       config["data"].get("mask_target", "binary")),
         batch_size=config["train"]["batch_size"],
         shuffle=False, num_workers=4, pin_memory=True,
     )
 
     os.makedirs(save_dir, exist_ok=True)
-    for batch in loader:
+    for batch in tqdm(loader, desc="Teacher probabilities", unit="batch",
+                      dynamic_ncols=True, leave=False):
         images = batch["image"].to(device)
         names = batch["name"]
         outputs = teacher_model(images)
@@ -81,9 +82,7 @@ def train_student(config, student_model, teacher_prob_dir, logger,
 
     img_size = config["train"]["img_size"]
     base_dir = config["data"]["base_dir"]
-    train_ids, _ = load_split_ids(
-        base_dir, config["data"]["seed"], config["data"].get("val_split", 0.3)
-    )
+    train_ids, _ = _resolve_split_ids(base_dir, config)
     batch_size = config["train"]["batch_size"]
     base_lr = config["train"]["base_lr"]
     add_epochs = config["train"]["epoch"]
@@ -91,7 +90,8 @@ def train_student(config, student_model, teacher_prob_dir, logger,
     end_epoch = start_epoch + add_epochs - 1
 
     base_dataset = MedicalDataset(base_dir, "train",
-                                  train_transform(img_size), train_ids)
+                                  train_transform(img_size), train_ids,
+                                  config["data"].get("mask_target", "binary"))
     distill_dataset = DistillationDataset(base_dataset, teacher_prob_dir)
     train_loader = DataLoader(
         distill_dataset, batch_size=batch_size,
@@ -124,22 +124,27 @@ def train_student(config, student_model, teacher_prob_dir, logger,
                 break
 
             epoch_loss = 0.0
-            for batch in train_loader:
-                images = batch["image"].to(device)
-                labels = batch["label"].to(device)
-                teacher_probs = batch["teacher_prob"].to(device)
+            with tqdm(train_loader, desc=f"Epoch {epoch}/{end_epoch} distill",
+                      unit="batch", dynamic_ncols=True, leave=False) as progress:
+                for batch_idx, batch in enumerate(progress, start=1):
+                    images = batch["image"].to(device)
+                    labels = batch["label"].to(device)
+                    teacher_probs = batch["teacher_prob"].to(device)
 
-                optimizer.zero_grad()
-                outputs = student_model(images)
-                student_probs = torch.sigmoid(outputs)
+                    optimizer.zero_grad()
+                    outputs = student_model(images)
+                    student_probs = torch.sigmoid(outputs)
 
-                hard_loss = hard_loss_fn(outputs, labels)
-                distill_loss = distill_loss_fn(student_probs, teacher_probs)
-                loss = hard_loss + 0.5 * distill_loss
+                    hard_loss = hard_loss_fn(outputs, labels)
+                    distill_loss = distill_loss_fn(student_probs, teacher_probs)
+                    loss = hard_loss + 0.5 * distill_loss
 
-                loss.backward()
-                optimizer.step()
-                epoch_loss += loss.item()
+                    loss.backward()
+                    optimizer.step()
+                    epoch_loss += loss.item()
+                    progress.set_postfix(
+                        loss=f"{epoch_loss / batch_idx:.4f}", refresh=False,
+                    )
 
             epoch_loss /= len(train_loader)
             line = f"Epoch [{epoch}/{end_epoch}]  distill_loss: {epoch_loss:.4f}"

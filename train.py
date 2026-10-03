@@ -11,6 +11,7 @@ if _PROJ_ROOT not in sys.path:
 
 import torch
 import torch.optim as optim
+from tqdm import tqdm
 
 from src.utils.config import add_common_args, add_train_args, build_config
 from src.utils.dataset import get_dataloaders
@@ -72,12 +73,13 @@ def main():
         model_name = validate_model(args.model)
         model = build_model(config, args.model, device)
         start_epoch = 1
-        best_iou = 0.0
+        best_iou = float("-inf")  # Save the first validated epoch even if IoU is zero.
         # 全新训练：创建全新的时间戳目录
         ckpt_stem = f"{timestamp_short()}_{model_name}"
         ckpt_new_stem = ckpt_stem
         os.makedirs(os.path.join("checkpoint", ckpt_stem), exist_ok=True)
 
+    ckpt_best_path = os.path.join("checkpoint", ckpt_stem, f"{ckpt_stem}_best.pth")
     train_loader, val_loader = get_dataloaders(config)
 
     base_lr = config["train"]["base_lr"]
@@ -127,42 +129,55 @@ def main():
                 "val_loss", "val_iou", "val_SE", "val_PC", "val_F1", "val_ACC",
             ]}
 
-            for batch in train_loader:
-                images = batch["image"].to(device)
-                labels = batch["label"].to(device)
+            with tqdm(train_loader, desc=f"Epoch {epoch}/{end_epoch} train",
+                      unit="batch", dynamic_ncols=True, leave=False) as train_progress:
+                for batch in train_progress:
+                    images = batch["image"].to(device)
+                    labels = batch["label"].to(device)
 
-                outputs = model(images)
-                loss = criterion(outputs, labels)
-                iou, _, _, _, _, _, _ = iou_score(outputs, labels)
+                    outputs = model(images)
+                    loss = criterion(outputs, labels)
+                    iou, _, _, _, _, _, _ = iou_score(outputs, labels)
 
-                optimizer.zero_grad()
-                loss.backward()
-                optimizer.step()
+                    optimizer.zero_grad()
+                    loss.backward()
+                    optimizer.step()
 
-                iter_num += 1
-                lr = base_lr * (1.0 - iter_num / max_iters) ** 0.9
-                for pg in optimizer.param_groups:
-                    pg["lr"] = lr
+                    iter_num += 1
+                    lr = base_lr * (1.0 - iter_num / max_iters) ** 0.9
+                    for pg in optimizer.param_groups:
+                        pg["lr"] = lr
 
-                meters["loss"].update(loss.item(), images.size(0))
-                meters["iou"].update(iou, images.size(0))
+                    meters["loss"].update(loss.item(), images.size(0))
+                    meters["iou"].update(iou, images.size(0))
+                    train_progress.set_postfix(
+                        loss=f"{meters['loss'].avg:.4f}",
+                        iou=f"{meters['iou'].avg:.4f}", lr=f"{lr:.2e}",
+                        refresh=False,
+                    )
 
             model.eval()
             with torch.no_grad():
-                for batch in val_loader:
-                    images = batch["image"].to(device)
-                    labels = batch["label"].to(device)
-                    outputs = model(images)
+                with tqdm(val_loader, desc=f"Epoch {epoch}/{end_epoch} val",
+                          unit="batch", dynamic_ncols=True, leave=False) as val_progress:
+                    for batch in val_progress:
+                        images = batch["image"].to(device)
+                        labels = batch["label"].to(device)
+                        outputs = model(images)
 
-                    loss = criterion(outputs, labels)
-                    iou, _, SE, PC, F1, _, ACC = iou_score(outputs, labels)
+                        loss = criterion(outputs, labels)
+                        iou, _, SE, PC, F1, _, ACC = iou_score(outputs, labels)
 
-                    meters["val_loss"].update(loss.item(), images.size(0))
-                    meters["val_iou"].update(iou, images.size(0))
-                    meters["val_SE"].update(SE, images.size(0))
-                    meters["val_PC"].update(PC, images.size(0))
-                    meters["val_F1"].update(F1, images.size(0))
-                    meters["val_ACC"].update(ACC, images.size(0))
+                        meters["val_loss"].update(loss.item(), images.size(0))
+                        meters["val_iou"].update(iou, images.size(0))
+                        meters["val_SE"].update(SE, images.size(0))
+                        meters["val_PC"].update(PC, images.size(0))
+                        meters["val_F1"].update(F1, images.size(0))
+                        meters["val_ACC"].update(ACC, images.size(0))
+                        val_progress.set_postfix(
+                            loss=f"{meters['val_loss'].avg:.4f}",
+                            iou=f"{meters['val_iou'].avg:.4f}", refresh=False,
+                        )
 
             line = (
                 f"Epoch Result[{epoch}/{end_epoch}]  "
@@ -182,7 +197,6 @@ def main():
 
             if meters["val_iou"].avg > best_iou:
                 best_iou = meters["val_iou"].avg
-                ckpt_best_path = os.path.join("checkpoint", ckpt_stem, f"{ckpt_stem}_best.pth")
                 save_checkpoint(
                     ckpt_best_path, model, epoch, best_iou,
                 )
@@ -207,10 +221,16 @@ def main():
         # 续训：T0.pth -> T1.pth，目录 T0 -> T1 原子重命名
         t1_pth = os.path.join("checkpoint", ckpt_stem, f"{ckpt_new_stem}_final.pth")
         os.rename(final_ckpt, t1_pth)
+        # Keep the best checkpoint resolvable under the new run stem, even when
+        # resumed epochs never improve on the previous best.
+        best_new_path = os.path.join("checkpoint", ckpt_stem, f"{ckpt_new_stem}_best.pth")
+        if os.path.isfile(ckpt_best_path):
+            os.rename(ckpt_best_path, best_new_path)
         old_dir = os.path.join("checkpoint", ckpt_stem)
         new_dir = os.path.join("checkpoint", ckpt_new_stem)
         os.rename(old_dir, new_dir)
-        final_ckpt = t1_pth
+        final_ckpt = os.path.join(new_dir, os.path.basename(t1_pth))
+        ckpt_best_path = os.path.join(new_dir, os.path.basename(best_new_path))
         final_dir = new_dir
         log_path = os.path.join(new_dir, f"{ckpt_new_stem}.log")
         logger.log_path = log_path
@@ -223,15 +243,17 @@ def main():
         else:
             print(f"=> Training finished (best val_iou: {best_iou:.4f})")
 
-    # 导出最终权重为 .onnx（输入尺寸与训练保持一致；SwinUnet 固定 224）
-    final_onnx = os.path.join(
-        final_dir, f"{os.path.basename(final_ckpt).removesuffix('.pth')}.onnx")
+    # 仅导出验证 IoU 最佳权重；final.pth 保留用于训练记录。
+    best_onnx = os.path.join(final_dir, f"{ckpt_new_stem}_best.onnx")
     onnx_img_size = 224 if model_name == "SwinUnet" else config["train"]["img_size"]
     try:
+        if not os.path.isfile(ckpt_best_path):
+            raise FileNotFoundError(f"No best checkpoint available: {ckpt_best_path}; "
+                                    "best ONNX export skipped")
         convert_pth_to_onnx(
             model=model,
-            pth_path=final_ckpt,
-            onnx_path=final_onnx,
+            pth_path=ckpt_best_path,
+            onnx_path=best_onnx,
             dummy_input=torch.randn(1, 3, onnx_img_size, onnx_img_size),
             dynamic_axes={"input": {0: "batch_size"},
                           "output": {0: "batch_size"}},  # 动态 batch
